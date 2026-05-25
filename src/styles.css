@@ -1,1 +1,248 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Fuente Global */
+  --font-sans: "Inter", sans-serif;
+  --default-font-family: var(--font-sans);
+
+  /* Colores Dinámicos (Atados a las variables del root) */
+  --color-background: var(--bg);
+  --color-background-secondary: var(--bg-sec);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-bg-strong: var(--glass-bg-strong);
+  --color-glass-border: var(--glass-border);
+  --color-glass-border-strong: var(--glass-border-strong);
+  --color-glass-hover: var(--glass-hover);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-border-base: var(--border-base);
+  --color-border-strong: var(--border-strong);
+
+  /* Colores Estáticos */
+  --color-success: #22c55e;
+  --color-warning: #facc15;
+  --color-danger: #ef4444;
+  --color-info: #38bdf8;
+
+  /* Sombras */
+  --shadow-sm: var(--shadow-sm-val);
+  --shadow-md: var(--shadow-md-val);
+  --shadow-lg: var(--shadow-lg-val);
+  --shadow-glow: var(--shadow-glow-val);
+
+  /* Bordes Redondeados (Radios) */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* Animaciones Nativas */
+  --animate-fade-in: fadeIn 0.35s ease;
+  --animate-slide-up: slideUp 0.35s ease;
+  --animate-scale-in: scaleIn 0.25s ease;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+/* =========================================================
+   2. VARIABLES CSS (DARK & LIGHT MODE)
+========================================================= */
+@layer base {
+  :root {
+    /* Modo Oscuro (Por defecto) */
+    --bg: #080808;
+    --bg-sec: #0d0d0d;
+    --surface: #111111;
+    --surface-elevated: #171717;
+    --surface-hover: #1d1d1d;
+
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-bg-strong: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-strong: rgba(255, 255, 255, 0.12);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --text-disabled: #52525b;
+
+    --accent: #f5f5f5;
+    --accent-hover: #e4e4e7;
+    --accent-soft: rgba(255, 255, 255, 0.08);
+
+    --border-base: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+
+    --shadow-sm-val: 0 4px 12px rgba(0,0,0,0.18);
+    --shadow-md-val: 0 8px 24px rgba(0,0,0,0.28);
+    --shadow-lg-val: 0 12px 40px rgba(0,0,0,0.36);
+    --shadow-glow-val: 0 0 0 1px rgba(255,255,255,0.02), 0 8px 30px rgba(255,255,255,0.02);
+  }
+
+  .light {
+    /* Modo Claro */
+    --bg: #f5f5f5;
+    --bg-sec: #ebebeb;
+    --surface: #ffffff;
+    --surface-elevated: #f9f9f9;
+    --surface-hover: #f1f1f1;
+
+    --glass-bg: rgba(255,255,255,0.65);
+    --glass-bg-strong: rgba(255,255,255,0.8);
+    --glass-border: rgba(0,0,0,0.06);
+    --glass-border-strong: rgba(0,0,0,0.1);
+    --glass-hover: rgba(0,0,0,0.04);
+
+    --text-primary: #111111;
+    --text-secondary: #52525b;
+    --text-muted: #71717a;
+    --text-disabled: #a1a1aa;
+
+    --accent: #111111;
+    --accent-hover: #27272a;
+    --accent-soft: rgba(0,0,0,0.05);
+
+    --border-base: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.12);
+
+    --shadow-sm-val: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-md-val: 0 8px 24px rgba(0,0,0,0.08);
+    --shadow-lg-val: 0 12px 40px rgba(0,0,0,0.1);
+    --shadow-glow-val: 0 0 0 1px rgba(0,0,0,0.02), 0 8px 30px rgba(0,0,0,0.03);
+  }
+}
+
+/* =========================================================
+   3. ESTILOS BASE GLOBALES (HTML, BODY)
+========================================================= */
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  .light {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Fondo global radial */
+  body::before {
+    content: "";
+    @apply fixed inset-0 pointer-events-none -z-20;
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.03), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(255,255,255,0.02), transparent 30%);
+  }
+
+  /* Textura de ruido */
+  body::after {
+    content: "";
+    @apply fixed inset-0 pointer-events-none -z-10;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(150,150,150,0.2); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(150,150,150,0.4); }
+
+  /* Selección de texto */
+  ::selection {
+    background: rgba(150, 150, 150, 0.2);
+    color: var(--text-primary);
+  }
+}
+
+/* =========================================================
+   4. COMPONENTES REUTILIZABLES (@apply)
+========================================================= */
+@layer components {
+  /* Contenedor principal */
+  .app-shell {
+    @apply min-h-screen bg-background text-text-primary;
+  }
+
+  /* Efecto Cristal */
+  .glass {
+    @apply bg-glass-bg border border-glass-border backdrop-blur-md shadow-glow;
+  }
+  .glass-hover {
+    @apply transition-all duration-200 ease-in-out hover:bg-glass-bg-strong hover:border-glass-border-strong hover:-translate-y-0.5;
+  }
+
+  /* Tarjeta */
+  .card {
+    @apply bg-surface border border-border-base rounded-lg shadow-md;
+  }
+
+  /* Botones (Nota: les añadí px-4 py-2 para que tengan espaciado por defecto) */
+  .btn-primary {
+    @apply bg-accent text-background px-4 py-2 rounded-md transition-all duration-200 hover:bg-accent-hover hover:-translate-y-px;
+  }
+  .btn-secondary {
+    @apply bg-transparent text-text-primary border border-border-base px-4 py-2 rounded-md transition-colors duration-200 hover:bg-glass-hover;
+  }
+
+  /* Inputs */
+  .input-base {
+    @apply w-full bg-glass-bg border border-border-base text-text-primary rounded-md px-3 py-2 transition-all duration-200;
+    @apply placeholder:text-text-muted;
+    @apply focus:outline-none focus:border-border-strong focus:bg-glass-bg-strong focus:ring-4 focus:ring-white/5;
+  }
+
+  /* Tablas */
+  .table-dark {
+    @apply w-full border-collapse;
+  }
+  .table-dark thead {
+    @apply bg-white/5;
+  }
+  .table-dark th {
+    @apply text-text-secondary text-xs font-semibold tracking-wider uppercase px-5 py-4;
+  }
+  .table-dark td {
+    @apply px-5 py-4;
+  }
+  .table-dark tbody tr {
+    @apply border-t border-border-base transition-colors duration-200 hover:bg-white/5;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium;
+  }
+  .badge-glass {
+    @apply bg-white/5 border border-white/10 text-text-primary;
+  }
+}

@@ -5,11 +5,12 @@ import { RouterModule } from '@angular/router';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CheckboxComponent } from '../../../../shared/ui/checkbox/checkbox.component';
+import {LogoComponent} from '../../../../shared/ui/logo/logo.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent, CheckboxComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent, CheckboxComponent, LogoComponent],
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {

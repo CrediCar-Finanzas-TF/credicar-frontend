@@ -226,7 +226,7 @@
     @apply w-full border-collapse;
   }
   .table-dark thead {
-    @apply bg-white/5;
+    @apply bg-surface-elevated transition-colors duration-300;
   }
   .table-dark th {
     @apply text-text-secondary text-xs font-semibold tracking-wider uppercase px-5 py-4;
@@ -235,14 +235,14 @@
     @apply px-5 py-4;
   }
   .table-dark tbody tr {
-    @apply border-t border-border-base transition-colors duration-200 hover:bg-white/5;
+    @apply border-t border-border-base transition-colors duration-200 hover:bg-surface-hover;
   }
 
   /* Badges */
   .badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-300;
   }
   .badge-glass {
-    @apply bg-white/5 border border-white/10 text-text-primary;
+    @apply bg-accent-soft border border-border-base text-text-primary;
   }
 }

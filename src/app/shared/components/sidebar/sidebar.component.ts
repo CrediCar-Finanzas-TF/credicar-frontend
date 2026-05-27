@@ -34,7 +34,7 @@ interface MenuItem {
             [routerLink]="item.route"
             routerLinkActive="bg-surface-hover text-text-primary !border-accent shadow-glow"
             [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
-            class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-secondary border-r-[3px] border-transparent hover:bg-surface-hover hover:text-text-primary transition-all duration-200 rounded-l-md"
+            class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-secondary border-r-[3px] border-transparent hover:bg-surface-hover hover:text-text-primary transition-all duration-200"
           >
             <span class="flex items-center justify-center w-5 h-5">
               @switch (item.label) {

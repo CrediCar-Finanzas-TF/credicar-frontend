@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { MetricCardComponent } from '../../../../shared/components/metric-card/metric-card.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { BadgeComponent } from '../../../../shared/ui/badge/badge.component';
 import { ChipComponent } from '../../../../shared/ui/chip/chip.component';
+import {DataTableComponent} from '../../../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-clients-page',
@@ -16,12 +16,20 @@ import { ChipComponent } from '../../../../shared/ui/chip/chip.component';
     MetricCardComponent,
     InputComponent,
     BadgeComponent,
-    ChipComponent
+    ChipComponent,
+    DataTableComponent
   ],
   templateUrl: './clients-page.component.html'
 })
 export class ClientsPageComponent {
   searchQuery: string = '';
+  cols = [
+    { field: 'client', header: 'Cliente' },
+    { field: 'dni', header: 'DNI' },
+    { field: 'phone', header: 'Teléfono' },
+    { field: 'status', header: 'Estado' },
+    { field: 'lastUpdate', header: 'Última Actualización' }
+  ];
 
   clients = Array(6).fill({
     initials: 'AL',

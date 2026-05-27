@@ -27,8 +27,20 @@ export const routes: Routes = [
     component: DashboardLayoutComponent,
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/pages/dashboard-home/dashboard-home.component').then(m => m.DashboardHomeComponent)
+      },
+      {
         path: 'clients',
         loadComponent: () => import('./features/clients/pages/clients-page/clients-page.component').then(m => m.ClientsPageComponent)
+      },
+      {
+        path: 'operations',
+        loadComponent: () => import('./features/operations/pages/operations-page/operations-page.component').then(m => m.OperationsPageComponent)
+      },
+      {
+        path: 'vehicles',
+        loadComponent: () => import('./features/vehicles/pages/vehicles-page/vehicles-page.component').then(m => m.VehiclesPageComponent)
       }
     ]
   }

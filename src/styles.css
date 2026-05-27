@@ -73,7 +73,6 @@
 ========================================================= */
 @layer base {
   :root {
-    /* Modo Oscuro (Por defecto) */
     --bg: #080808;
     --bg-sec: #0d0d0d;
     --surface: #111111;
@@ -101,22 +100,23 @@
     --shadow-sm-val: 0 4px 12px rgba(0,0,0,0.18);
     --shadow-md-val: 0 8px 24px rgba(0,0,0,0.28);
     --shadow-lg-val: 0 12px 40px rgba(0,0,0,0.36);
-    --shadow-glow-val: 0 0 0 1px rgba(255,255,255,0.02), 0 8px 30px rgba(255,255,255,0.02);
+    --shadow-glow-val: 0 0 15px 2px rgba(255, 255, 255, 0.07);
   }
 
   .light {
-    /* Modo Claro */
     --bg: #f5f5f5;
-    --bg-sec: #ebebeb;
+    --bg-sec: #e4e4e7;
     --surface: #ffffff;
-    --surface-elevated: #f9f9f9;
-    --surface-hover: #f1f1f1;
+    --surface-elevated: #fafafa;
 
-    --glass-bg: rgba(255,255,255,0.65);
-    --glass-bg-strong: rgba(255,255,255,0.8);
-    --glass-border: rgba(0,0,0,0.06);
-    --glass-border-strong: rgba(0,0,0,0.1);
-    --glass-hover: rgba(0,0,0,0.04);
+    --surface-hover: #ececef;
+
+    --glass-bg: rgba(255,255,255,0.75);
+    --glass-bg-strong: rgba(255,255,255,0.9);
+    --glass-border: rgba(0,0,0,0.08);
+    --glass-border-strong: rgba(0,0,0,0.15);
+
+    --glass-hover: rgba(0,0,0,0.08);
 
     --text-primary: #111111;
     --text-secondary: #52525b;
@@ -125,15 +125,16 @@
 
     --accent: #111111;
     --accent-hover: #27272a;
-    --accent-soft: rgba(0,0,0,0.05);
 
-    --border-base: rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.12);
+    --accent-soft: rgba(0,0,0,0.12);
+
+    --border-base: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.20);
 
     --shadow-sm-val: 0 4px 12px rgba(0,0,0,0.06);
     --shadow-md-val: 0 8px 24px rgba(0,0,0,0.08);
     --shadow-lg-val: 0 12px 40px rgba(0,0,0,0.1);
-    --shadow-glow-val: 0 0 0 1px rgba(0,0,0,0.02), 0 8px 30px rgba(0,0,0,0.03);
+    --shadow-glow-val: 0 0 15px 2px rgba(0, 0, 0, 0.09);
   }
 }
 

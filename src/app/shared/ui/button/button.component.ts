@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
       [type]="type()"
       [disabled]="disabled()"
       [ngClass]="computedClasses()"
-      class="flex items-center justify-center gap-2 rounded-none font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="flex items-center justify-center gap-2 font-medium text-sm transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <ng-content></ng-content>
     </button>
@@ -21,11 +21,14 @@ export class ButtonComponent {
   type = input<'button' | 'submit' | 'reset'>('button');
   fullWidth = input<boolean>(false);
   disabled = input<boolean>(false);
+  rounded = input<boolean>(false);
 
   computedClasses = computed(() => {
     const base = {
       'w-full': this.fullWidth(),
       'px-4 py-2.5': true,
+      'rounded-md': this.rounded(),
+      'rounded-none': !this.rounded(),
     };
 
     const variants = {

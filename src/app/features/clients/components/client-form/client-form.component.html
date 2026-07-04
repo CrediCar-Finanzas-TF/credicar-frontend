@@ -1,0 +1,70 @@
+<form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="bg-surface border border-border-base rounded-lg p-6 flex flex-col gap-7 transition-colors duration-300">
+
+  <h3 class="text-xl font-semibold text-text-primary">Nuevo cliente</h3>
+
+  <div class="flex flex-col gap-5">
+    <h4 class="text-sm font-semibold text-text-secondary tracking-wider uppercase pb-3 border-b border-border-base">1. Información personal</h4>
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-medium text-text-secondary">Tipo documento</label>
+      <app-segmented-toggle [options]="documentTypes" formControlName="documentType"></app-segmented-toggle>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <app-input label="Número de documento" [rounded]="true" formControlName="documentNumber"></app-input>
+      <app-input label="Nombres" [rounded]="true" formControlName="firstName"></app-input>
+    </div>
+
+    <app-input label="Apellidos" [rounded]="true" formControlName="lastName"></app-input>
+  </div>
+
+  <div class="flex flex-col gap-5">
+    <h4 class="text-sm font-semibold text-text-secondary tracking-wider uppercase pb-3 border-b border-border-base">2. Contacto y ubicación</h4>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <app-input label="Teléfono" [rounded]="true" formControlName="phone"></app-input>
+      <app-input label="Correo electrónico" type="email" [rounded]="true" formControlName="email"></app-input>
+    </div>
+
+    <app-input label="Dirección" [rounded]="true" formControlName="address"></app-input>
+  </div>
+
+  <div class="flex flex-col gap-5">
+    <div class="flex items-center justify-between pb-3 border-b border-border-base">
+      <h4 class="text-sm font-semibold text-text-secondary tracking-wider uppercase">3. Información financiera</h4>
+      <app-badge>
+        <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+        <span class="uppercase tracking-wide font-semibold">Score pendiente</span>
+      </app-badge>
+    </div>
+
+    <app-input label="Empresa" [rounded]="true" formControlName="company"></app-input>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <app-input
+        label="Ingreso mensual (USD)"
+        type="number"
+        min="0"
+        step="0.01"
+        [hasLeftIcon]="true"
+        [rounded]="true"
+        formControlName="monthlyIncome"
+      >
+        <span left-icon class="text-sm font-medium">$</span>
+      </app-input>
+      <app-input
+        label="Antigüedad laboral (años)"
+        type="number"
+        min="0"
+        step="0.01"
+        [rounded]="true"
+        formControlName="laborSeniority"
+      ></app-input>
+    </div>
+  </div>
+
+  @if (showValidationError()) {
+    <p class="text-sm text-danger">Completa todos los campos obligatorios con datos válidos antes de continuar.</p>
+  }
+
+</form>

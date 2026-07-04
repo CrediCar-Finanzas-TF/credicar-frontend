@@ -1,0 +1,73 @@
+<div class="flex flex-col gap-8 animate-fade-in w-full max-w-6xl mx-auto pb-24">
+
+  <app-progress-stepper [steps]="steps" [currentStep]="3"></app-progress-stepper>
+
+  <app-simulation-header
+    title="Coberturas y seguros"
+    subtitle="Agrega coberturas opcionales y visualiza el impacto en la cotización"
+  ></app-simulation-header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+
+    <div class="flex flex-col gap-6">
+      @for (coverage of coverages(); track coverage.id) {
+        <app-insurance-coverage-card
+          [title]="coverage.title"
+          [description]="coverage.description"
+          [monthlyCostLabel]="formatPrice(coverage.monthlyCost)"
+          [mandatory]="coverage.mandatory"
+          [active]="coverage.active"
+          (activeChange)="toggleCoverage(coverage.id, $event)"
+        >
+          <span icon>
+            @switch (coverage.id) {
+              @case ('desgravamen') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+              }
+              @case ('vehicular-tr') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/></svg>
+              }
+              @case ('asistencia-vial') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              }
+              @case ('garantia-extendida') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              }
+              @case ('desempleo') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              }
+            }
+          </span>
+        </app-insurance-coverage-card>
+      }
+    </div>
+
+    <app-financial-summary
+      [clientName]="clientName ?? 'Ninguno'"
+      [vehicleName]="vehicleName ?? 'Ninguno'"
+      totalPrice="S/ 85,000"
+      downPayment="S/ 15,000"
+      downPaymentPercent="17.6%"
+      financedAmount="S/ 70,000"
+      term="48 meses"
+      tea="14.5%"
+      notaryFee="S/ 480"
+      registryFee="S/ 210"
+      [additionalCosts]="additionalCosts"
+      [estimatedInstallment]="estimatedInstallmentLabel"
+    ></app-financial-summary>
+
+  </div>
+
+</div>
+
+<app-simulation-footer
+  [clientName]="clientName"
+  [vehicleName]="vehicleName"
+  [showBasePrice]="false"
+  [showSecondaryButton]="true"
+  secondaryLabel="Omitir seguros"
+  (back)="onBack()"
+  (secondary)="onSkipInsurance()"
+  (continue)="onFooterContinue()"
+></app-simulation-footer>

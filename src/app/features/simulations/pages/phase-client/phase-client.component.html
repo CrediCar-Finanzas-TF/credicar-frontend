@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-8 animate-fade-in w-full max-w-6xl mx-auto pb-24">
+
+  <app-progress-stepper [steps]="steps" [currentStep]="0"></app-progress-stepper>
+
+  <app-simulation-header
+    title="Información del cliente"
+    subtitle="Selecciona un cliente existente o registra uno nuevo"
+  ></app-simulation-header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+    <app-client-list
+      [clients]="registeredClients"
+      [selectedId]="selectedClient()?.id ?? null"
+      (select)="selectExistingClient($event)"
+    ></app-client-list>
+
+    <app-client-form (continue)="onClientFormContinue($event)"></app-client-form>
+  </div>
+
+</div>
+
+<app-simulation-footer
+  [clientName]="selectedClient() ? (selectedClient()!.firstName + ' ' + selectedClient()!.lastName) : null"
+  [vehicleName]="null"
+  [basePrice]="null"
+  [showBackButton]="false"
+  (continue)="onFooterContinue()"
+></app-simulation-footer>

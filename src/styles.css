@@ -183,6 +183,24 @@
     background: rgba(150, 150, 150, 0.2);
     color: var(--text-primary);
   }
+
+  /* Oculta las flechas nativas de los campos numéricos */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  /* Excluye el footer de simulación del cross-fade de View Transitions del router */
+  ::view-transition-old(simulation-footer),
+  ::view-transition-new(simulation-footer) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
 }
 
 /* =========================================================

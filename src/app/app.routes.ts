@@ -41,6 +41,10 @@ export const routes: Routes = [
       {
         path: 'vehicles',
         loadComponent: () => import('./features/vehicles/pages/vehicles-page/vehicles-page.component').then(m => m.VehiclesPageComponent)
+      },
+      {
+        path: 'simulations',
+        loadChildren: () => import('./features/simulations/simulations.routes').then(m => m.simulationsRoutes)
       }
     ]
   }

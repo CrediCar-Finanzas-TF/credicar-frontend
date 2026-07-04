@@ -30,14 +30,18 @@ import { CommonModule } from '@angular/common';
           [type]="isPassword() && !isPasswordVisible() ? 'password' : (isPassword() ? 'text' : type())"
           [placeholder]="placeholder()"
           [disabled]="disabled"
+          [attr.min]="min() || null"
+          [attr.step]="step() || null"
           [(ngModel)]="value"
           (input)="onInput($event)"
           (blur)="onTouched()"
-          class="w-full bg-transparent border border-border-base text-text-primary text-sm rounded-none py-2.5 transition-all duration-200 focus:outline-none focus:border-border-strong focus:bg-white/5 disabled:opacity-50"
+          class="w-full bg-transparent border border-border-base text-text-primary text-sm py-2.5 transition-all duration-200 focus:outline-none focus:border-border-strong focus:bg-glass-hover disabled:opacity-50"
           [ngClass]="{
             'pl-10': hasLeftIcon(),
             'px-3.5': !hasLeftIcon(),
-            'pr-10': isPassword()
+            'pr-10': isPassword(),
+            'rounded-md': rounded(),
+            'rounded-none': !rounded()
           }"
         />
 
@@ -64,6 +68,9 @@ export class InputComponent implements ControlValueAccessor {
   placeholder = input<string>('');
   hasLeftIcon = input<boolean>(false);
   isPassword = input<boolean>(false);
+  rounded = input<boolean>(false);
+  min = input<string>('');
+  step = input<string>('');
 
   isPasswordVisible = signal(false);
   value: string = '';

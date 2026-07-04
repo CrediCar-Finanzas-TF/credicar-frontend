@@ -35,20 +35,33 @@ import { Vehicle } from '../../../../core/models/vehicle.model';
           }
         </div>
 
-        <div class="mt-auto flex justify-between items-end border-t border-border-base/40 pt-5">
-          <div class="flex flex-col">
-            <span class="text-xs text-text-muted mb-0.5">Desde</span>
-            <span class="text-lg font-bold text-text-primary">{{ vehicle().price }}</span>
-          </div>
+        @if (selectable()) {
+          <div class="mt-auto flex flex-col gap-3 border-t border-border-base/40 pt-5">
+            <div class="flex flex-col">
+              <span class="text-xs text-text-muted mb-0.5">Precio base desde</span>
+              <span class="text-lg font-bold text-text-primary">{{ vehicle().price }}</span>
+            </div>
 
-          <app-button
-            variant="outline"
-            class="[&>button]:px-4 [&>button]:py-1.5 [&>button]:text-xs"
-            (click)="onViewDetail.emit(vehicle())"
-          >
-            Ver detalle
-          </app-button>
-        </div>
+            <app-button variant="outline" [fullWidth]="true" (click)="onSelect.emit(vehicle())">
+              Seleccionar vehículo
+            </app-button>
+          </div>
+        } @else {
+          <div class="mt-auto flex justify-between items-end border-t border-border-base/40 pt-5">
+            <div class="flex flex-col">
+              <span class="text-xs text-text-muted mb-0.5">Desde</span>
+              <span class="text-lg font-bold text-text-primary">{{ vehicle().price }}</span>
+            </div>
+
+            <app-button
+              variant="outline"
+              class="[&>button]:px-4 [&>button]:py-1.5 [&>button]:text-xs"
+              (click)="onViewDetail.emit(vehicle())"
+            >
+              Ver detalle
+            </app-button>
+          </div>
+        }
 
       </div>
     </div>
@@ -56,6 +69,8 @@ import { Vehicle } from '../../../../core/models/vehicle.model';
 })
 export class VehicleCardComponent {
   vehicle = input.required<Vehicle>();
+  selectable = input<boolean>(false);
 
   onViewDetail = output<Vehicle>();
+  onSelect = output<Vehicle>();
 }

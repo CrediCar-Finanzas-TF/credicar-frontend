@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ButtonComponent } from '../../ui/button/button.component';
 import { LogoComponent } from '../../ui/logo/logo.component';
 
 interface MenuItem {
@@ -12,7 +11,7 @@ interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonComponent, LogoComponent],
+  imports: [CommonModule, RouterModule, LogoComponent],
   template: `
     <aside class="w-[280px] h-screen bg-surface-elevated border-r border-border-base/50 flex flex-col justify-between select-none transition-colors duration-300">
 
@@ -22,10 +21,13 @@ interface MenuItem {
           <h1 class="text-xl font-bold tracking-tight">CrediCar</h1>
         </div>
 
-        <app-button variant="outline" [fullWidth]="true" class="mt-2">
+        <a
+          routerLink="/simulations"
+          class="flex items-center justify-center gap-2 w-full px-4 py-2.5 mt-2 rounded-none font-medium text-sm bg-transparent border border-border-base text-text-primary hover:bg-glass-hover transition-all duration-200"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
           <span>Nueva simulación</span>
-        </app-button>
+        </a>
       </div>
 
       <nav class="flex-1 flex flex-col gap-1 px-3">

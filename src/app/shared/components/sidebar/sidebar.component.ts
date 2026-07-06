@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LogoComponent } from '../../ui/logo/logo.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface MenuItem {
   label: string;
@@ -70,10 +71,10 @@ interface MenuItem {
         </a>
 
         <div class="p-5 bg-surface flex items-center gap-3 border-t border-border-base/20 transition-colors duration-300">
-          <img src="https://i.redd.it/who-has-the-best-lineup-icon-v0-mspllr4j9ncd1.jpg?width=1000&format=pjpg&auto=webp&s=86f5809f528a184b6ee72c81b889cbf9d357b2d7" alt="Alex Aquino" class="w-10 h-10 object-cover rounded-none border border-border-base">
+          <img src="https://i.redd.it/who-has-the-best-lineup-icon-v0-mspllr4j9ncd1.jpg?width=1000&format=pjpg&auto=webp&s=86f5809f528a184b6ee72c81b889cbf9d357b2d7" [alt]="authService.currentUser()?.fullName ?? 'Usuario'" class="w-10 h-10 object-cover rounded-none border border-border-base">
           <div class="flex flex-col min-w-0">
-            <span class="text-sm font-semibold text-text-primary truncate">Alex Aquino</span>
-            <span class="text-xs text-text-muted truncate">Asesor Senior</span>
+            <span class="text-sm font-semibold text-text-primary truncate">{{ authService.currentUser()?.fullName ?? 'Usuario' }}</span>
+            <span class="text-xs text-text-muted truncate">{{ authService.currentUser()?.email ?? '' }}</span>
           </div>
         </div>
       </div>
@@ -82,6 +83,8 @@ interface MenuItem {
   `
 })
 export class SidebarComponent {
+  authService = inject(AuthService);
+
   menuItems: MenuItem[] = [
     { label: 'Dashboard', route: '/dashboard' },
     { label: 'Clientes', route: '/clients' },

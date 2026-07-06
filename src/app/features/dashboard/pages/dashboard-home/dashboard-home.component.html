@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-6 animate-fade-in w-full max-w-7xl mx-auto pb-8">
 
-  <app-welcome-banner userName="Alex Aquino"></app-welcome-banner>
+  <app-welcome-banner [userName]="authService.currentUser()?.fullName ?? 'Usuario'"></app-welcome-banner>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
     <app-metric-card title="Simulaciones Hoy" value="12">

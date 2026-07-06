@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MetricCardComponent } from '../../../../shared/components/metric-card/metric-card.component';
 import { WelcomeBannerComponent } from '../../components/welcome-banner/welcome-banner.component';
 import { ActivityTableComponent } from '../../components/activity-table/activity-table.component';
 import { PendingOperationsComponent } from '../../components/pending-operations/pending-operations.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -29,4 +30,6 @@ import { PendingOperationsComponent } from '../../components/pending-operations/
     }
   `]
 })
-export class DashboardHomeComponent {}
+export class DashboardHomeComponent {
+  authService = inject(AuthService);
+}

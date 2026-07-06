@@ -8,6 +8,7 @@ import { ClientListComponent } from '../../../clients/components/client-list/cli
 import { ClientFormComponent } from '../../../clients/components/client-form/client-form.component';
 import { Client } from '../../../../core/models/client.model';
 import { SimulationStore } from '../../store/simulation.store';
+import { ClientService } from '../../../clients/services/client.service';
 
 @Component({
   selector: 'app-phase-client',
@@ -28,6 +29,8 @@ export class PhaseClientComponent implements OnInit, AfterViewInit {
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
 
   selectedClient = signal<Client | null>(null);
+  isSaving = signal(false);
+  errorMessage = signal('');
 
   registeredClients: Client[] = Array(12).fill(null).map((_, index) => ({
     id: `C-${1000 + index}`,
@@ -43,7 +46,11 @@ export class PhaseClientComponent implements OnInit, AfterViewInit {
     laborSeniority: null
   }));
 
-  constructor(private router: Router, private simulationStore: SimulationStore) {}
+  constructor(
+    private router: Router,
+    private simulationStore: SimulationStore,
+    private clientService: ClientService
+  ) {}
 
   ngOnInit() {
     const previousClient = this.simulationStore.selectedClient();
@@ -67,7 +74,19 @@ export class PhaseClientComponent implements OnInit, AfterViewInit {
   }
 
   onClientFormContinue(client: Client) {
-    this.proceedToVehiclePhase(client);
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+
+    this.clientService.createClient(client).subscribe({
+      next: (createdClient) => {
+        this.isSaving.set(false);
+        this.proceedToVehiclePhase(createdClient);
+      },
+      error: () => {
+        this.isSaving.set(false);
+        this.errorMessage.set('No se pudo registrar el cliente. Verifica los datos e inténtalo de nuevo.');
+      }
+    });
   }
 
   onFooterContinue() {

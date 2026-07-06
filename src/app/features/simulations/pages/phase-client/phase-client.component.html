@@ -14,7 +14,13 @@
       (select)="selectExistingClient($event)"
     ></app-client-list>
 
-    <app-client-form (continue)="onClientFormContinue($event)"></app-client-form>
+    <div class="flex flex-col gap-3">
+      <app-client-form (continue)="onClientFormContinue($event)"></app-client-form>
+
+      @if (errorMessage()) {
+        <p class="text-sm text-danger">{{ errorMessage() }}</p>
+      }
+    </div>
   </div>
 
 </div>
@@ -24,5 +30,7 @@
   [vehicleName]="null"
   [basePrice]="null"
   [showBackButton]="false"
+  [continueDisabled]="isSaving()"
+  [continueLabel]="isSaving() ? 'Guardando...' : 'Continuar'"
   (continue)="onFooterContinue()"
 ></app-simulation-footer>

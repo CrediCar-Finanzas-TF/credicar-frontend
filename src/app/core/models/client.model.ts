@@ -13,3 +13,20 @@ export interface Client {
   laborSeniority: number | null;
   creditScoreStatus?: 'Pendiente' | 'Aprobado' | 'Rechazado';
 }
+
+export interface ClientRequest {
+  documentType: string;
+  documentNumber: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  streetAddress: string;
+  company: string;
+  monthlyIncome: number;
+  seniorityYears: number;
+}
+
+export interface ClientResponse extends ClientRequest {
+  id: number;
+}

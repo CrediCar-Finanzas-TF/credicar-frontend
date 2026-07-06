@@ -9,8 +9,6 @@ import { InsuranceCoverageCardComponent } from '../../components/insurance-cover
 import { InsuranceCoverage } from '../../models/insurance-coverage.model';
 import { SimulationStore } from '../../store/simulation.store';
 
-const BASE_INSTALLMENT = 1850;
-
 @Component({
   selector: 'app-phase-insurance',
   standalone: true,
@@ -72,6 +70,27 @@ export class PhaseInsuranceComponent {
 
   constructor(private router: Router, protected simulationStore: SimulationStore) {}
 
+  // Extraemos la configuración financiera del store
+  get financing() {
+    // Intenta leer del store (asegúrate de tener financingData en tu SimulationStore)
+    const data = (this.simulationStore as any).financingData?.();
+
+    // Fallback de seguridad si el store aún no tiene los datos guardados
+    return data || {
+      totalPrice: this.simulationStore.selectedVehicle()?.price ?? 'S/ 0',
+      downPayment: 'S/ 0',
+      downPaymentPercent: '0%',
+      financedAmount: 'S/ 0',
+      term: '48 meses',
+      rateTypeLabel: 'TEA',
+      rateValue: '0%',
+      balloonAmount: '0',
+      notaryFee: 'S/ 0',
+      registryFee: 'S/ 0',
+      baseInstallment: 1850 // Cuota base provisional
+    };
+  }
+
   get clientName(): string | null {
     const client = this.simulationStore.selectedClient();
     return client ? `${client.firstName} ${client.lastName}` : null;
@@ -88,14 +107,19 @@ export class PhaseInsuranceComponent {
   }
 
   formatPrice(value: number): string {
-    return 'S/ ' + value.toLocaleString('en-US');
+    // Detectamos si la simulación está en dólares o soles leyendo el precio
+    const symbol = this.financing.totalPrice.includes('$') ? '$' : 'S/';
+    return `${symbol} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
+  // Ahora solo mostramos los seguros que el usuario haya activado
   get additionalCosts(): SummaryCostLine[] {
-    return this.coverages().map(coverage => ({
-      label: coverage.title,
-      value: coverage.active ? this.formatPrice(coverage.monthlyCost) : 'S/ 0'
-    }));
+    return this.coverages()
+      .filter(coverage => coverage.active)
+      .map(coverage => ({
+        label: coverage.title,
+        value: this.formatPrice(coverage.monthlyCost)
+      }));
   }
 
   get estimatedInstallmentLabel(): string {
@@ -103,7 +127,8 @@ export class PhaseInsuranceComponent {
       .filter(c => c.active)
       .reduce((sum, c) => sum + c.monthlyCost, 0);
 
-    return this.formatPrice(BASE_INSTALLMENT + activeCoveragesTotal);
+    const base = this.financing.baseInstallment || 1850;
+    return this.formatPrice(base + activeCoveragesTotal);
   }
 
   onBack() {
@@ -121,5 +146,6 @@ export class PhaseInsuranceComponent {
 
   private proceedToResult() {
     console.log('Coberturas configuradas, continuar a fase Resultado:', this.coverages());
+    // this.router.navigate(['/simulations/result']);
   }
 }

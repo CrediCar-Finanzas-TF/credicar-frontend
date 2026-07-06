@@ -44,7 +44,9 @@ export class PhaseVehicleComponent {
       model: 'Corolla Cross HEV',
       version: 'Hybrid Premium 2026',
       features: ['Automático', 'Híbrido', 'SUV'],
-      price: 'S/ 95,000',
+      price: 'S/ 65,000',
+      oldPrice: 'S/ 98,500',   // <--- Agregado
+      priceUsd: '$ 27,859',    // <--- Agregado
       motor: '1.8L Híbrido',
       transmision: 'E-CVT',
       potencia: '122 HP',
@@ -61,6 +63,7 @@ export class PhaseVehicleComponent {
       version: 'AWD 2025',
       features: ['Automático', 'Gasolina', 'AWD'],
       price: 'S/ 112,500',
+      priceUsd: '$ 32,990',    // <--- Agregado
       motor: '2.5L MPI',
       transmision: 'Automática 6 Vel.',
       potencia: '187 HP',
@@ -77,6 +80,8 @@ export class PhaseVehicleComponent {
       version: '2025',
       features: ['Automático', 'Gasolina', 'SUV'],
       price: 'S/ 88,000',
+      // oldPrice: ... (Puedes omitirlo si no tiene descuento y no se mostrará)
+      priceUsd: '$ 25,800',    // <--- Agregado
       motor: '2.0L MPI',
       transmision: 'Automática 6 Vel.',
       potencia: '154 HP',

@@ -2,6 +2,7 @@ export interface Client {
   id?: string;
   documentType: 'DNI' | 'CE' | 'Pasaporte';
   documentNumber: string;
+  nationality?: string;
   firstName: string;
   lastName: string;
   phone: string;

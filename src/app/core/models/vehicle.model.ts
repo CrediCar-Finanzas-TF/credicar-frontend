@@ -7,6 +7,7 @@ export interface Vehicle {
   version: string;
   price: string;
   oldPrice?: string;
+  priceUsd?: string;
   features: string[];
   motor: string;
   transmision: string;

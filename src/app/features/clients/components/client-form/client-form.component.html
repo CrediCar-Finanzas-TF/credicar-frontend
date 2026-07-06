@@ -1,4 +1,4 @@
-<form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="bg-surface border border-border-base rounded-lg p-6 flex flex-col gap-7 transition-colors duration-300">
+<form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-7 transition-colors duration-300">
 
   <h3 class="text-xl font-semibold text-text-primary">Nuevo cliente</h3>
 
@@ -11,22 +11,28 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <app-input label="Número de documento" [rounded]="true" formControlName="documentNumber"></app-input>
-      <app-input label="Nombres" [rounded]="true" formControlName="firstName"></app-input>
+      <app-input label="Número de documento" formControlName="documentNumber"></app-input>
+
+      @if (showNationality()) {
+        <app-input label="Nacionalidad" formControlName="nationality"></app-input>
+      }
     </div>
 
-    <app-input label="Apellidos" [rounded]="true" formControlName="lastName"></app-input>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <app-input label="Nombres" formControlName="firstName"></app-input>
+      <app-input label="Apellidos" formControlName="lastName"></app-input>
+    </div>
   </div>
 
   <div class="flex flex-col gap-5">
     <h4 class="text-sm font-semibold text-text-secondary tracking-wider uppercase pb-3 border-b border-border-base">2. Contacto y ubicación</h4>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <app-input label="Teléfono" [rounded]="true" formControlName="phone"></app-input>
-      <app-input label="Correo electrónico" type="email" [rounded]="true" formControlName="email"></app-input>
+      <app-input label="Teléfono" formControlName="phone"></app-input>
+      <app-input label="Correo electrónico" type="email" formControlName="email"></app-input>
     </div>
 
-    <app-input label="Dirección" [rounded]="true" formControlName="address"></app-input>
+    <app-input label="Dirección" formControlName="address"></app-input>
   </div>
 
   <div class="flex flex-col gap-5">
@@ -38,7 +44,7 @@
       </app-badge>
     </div>
 
-    <app-input label="Empresa" [rounded]="true" formControlName="company"></app-input>
+    <app-input label="Empresa" formControlName="company"></app-input>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <app-input
@@ -47,7 +53,6 @@
         min="0"
         step="0.01"
         [hasLeftIcon]="true"
-        [rounded]="true"
         formControlName="monthlyIncome"
       >
         <span left-icon class="text-sm font-medium">$</span>
@@ -57,7 +62,6 @@
         type="number"
         min="0"
         step="0.01"
-        [rounded]="true"
         formControlName="laborSeniority"
       ></app-input>
     </div>

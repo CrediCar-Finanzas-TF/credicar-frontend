@@ -11,11 +11,21 @@
 
     <div class="flex flex-col gap-6">
 
-      <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-5">
+      <div class="bg-info/10 border border-info/20 text-info px-4 py-3 rounded-none flex items-center justify-between text-sm">
+        <div class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="m18 8 4 4-4 4"/><path d="m6 16-4-4 4-4"/></svg>
+          <span class="font-medium">Tasa de cambio referencial:</span>
+        </div>
+        <span class="font-bold">USD 1.00 = S/ {{ exchangeRate }}</span>
+      </div>
+
+      <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-5">
         <h3 class="text-xl font-semibold text-text-primary">Condiciones de Financiamiento</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <app-input label="Precio del vehículo" [rounded]="true" formControlName="vehiclePrice"></app-input>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
+          <app-input label="Precio del vehículo" type="number" [hasLeftIcon]="true" formControlName="vehiclePrice">
+            <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+          </app-input>
 
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-medium text-text-secondary">Moneda</label>
@@ -23,48 +33,101 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div class="flex flex-col gap-1.5">
-            <app-input label="Cuota inicial" type="number" min="0" [rounded]="true" formControlName="downPayment"></app-input>
-            <span class="text-xs text-text-muted">Mínima: S/ 12,000</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
+          <div class="flex flex-col gap-1.5 w-full">
+            <label class="text-sm font-medium text-text-secondary">Cuota Inicial (Min 10% - Max 80%)</label>
+            <div class="flex gap-2 w-full">
+              <div class="flex-1">
+                <app-input type="number" [hasLeftIcon]="true" formControlName="downPaymentAmount">
+                  <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+                </app-input>
+              </div>
+              <div class="w-24">
+                <app-input type="number" [hasLeftIcon]="true" formControlName="downPaymentPercent">
+                  <span left-icon class="text-sm font-medium">%</span>
+                </app-input>
+              </div>
+            </div>
+            @if (financingForm.get('downPaymentPercent')?.hasError('min') || financingForm.get('downPaymentPercent')?.hasError('max')) {
+              <span class="text-xs text-danger mt-1">El porcentaje debe estar entre 10% y 80%.</span>
+            }
           </div>
 
-          <app-input label="Monto a financiar" [rounded]="true" formControlName="financedAmount"></app-input>
+          <app-input label="Saldo a financiar del activo" type="number" [hasLeftIcon]="true" formControlName="assetFinancedBalance">
+            <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+          </app-input>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
           <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-medium text-text-secondary">Número de cuotas</label>
+            <label class="text-sm font-medium text-text-secondary">Plazo de pago</label>
             <app-select [options]="installmentOptions" formControlName="installments"></app-select>
           </div>
 
-          <app-input label="Fecha 1era cuota" type="date" [rounded]="true" formControlName="firstPaymentDate"></app-input>
+          <app-input label="Monto del préstamo (Inc. Costos)" type="number" [hasLeftIcon]="true" formControlName="totalLoanAmount">
+            <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+          </app-input>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-4">
+        <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-4">
           <h3 class="text-base font-semibold text-text-primary">Modalidad</h3>
           <app-segmented-toggle [options]="modalityOptions" formControlName="modality"></app-segmented-toggle>
 
           @if (financingForm.value.modality === 'Compra inteligente') {
-            <div class="bg-surface-elevated border border-border-base rounded-md p-4 flex flex-col gap-1">
-              <span class="text-xs text-text-muted">Cuota Balón (Final)</span>
-              <span class="text-lg font-bold text-text-primary">S/ 35,000</span>
-              <p class="text-xs text-text-muted mt-1">Al finalizar el periodo, el cliente decide cancelar esta cuota, refinanciar o renovar el vehículo.</p>
+            <div class="bg-surface-elevated border border-border-base rounded-none p-4 flex flex-col gap-3 animate-fade-in">
+              <div class="flex flex-col gap-1.5 w-full">
+                <label class="text-xs font-semibold text-text-secondary uppercase tracking-wider">Cuota Balón (20% - 50%)</label>
+                <div class="flex gap-2 w-full">
+                  <div class="flex-1">
+                    <app-input type="number" [hasLeftIcon]="true" formControlName="balloonAmount">
+                      <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+                    </app-input>
+                  </div>
+                  <div class="w-[84px]">
+                    <app-input type="number" [hasLeftIcon]="true" formControlName="balloonPercent">
+                      <span left-icon class="text-sm font-medium">%</span>
+                    </app-input>
+                  </div>
+                </div>
+                @if (financingForm.get('balloonPercent')?.hasError('min') || financingForm.get('balloonPercent')?.hasError('max')) {
+                  <span class="text-[10px] text-danger">Fuera del rango permitido (20-50%).</span>
+                }
+              </div>
+              <p class="text-[11px] text-text-muted leading-tight">Monto programado para el último periodo. El cliente decide cancelar, refinanciar o renovar el vehículo.</p>
+            </div>
+          } @else {
+            <div class="bg-surface-elevated border border-border-base rounded-none p-4 flex flex-col animate-fade-in">
+              <p class="text-[11px] text-text-muted leading-tight">Crédito vehicular estándar donde el monto total a financiar se divide en cuotas fijas durante todo el plazo elegido, sin cuota final.</p>
             </div>
           }
         </div>
 
-        <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-4">
+        <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-4">
           <h3 class="text-base font-semibold text-text-primary">Tasa de Interés</h3>
           <app-segmented-toggle [options]="rateTypeOptions" formControlName="rateType"></app-segmented-toggle>
-          <app-input label="Valor tasa (%)" type="number" min="0" step="0.01" [rounded]="true" formControlName="rateValue"></app-input>
+
+          <div class="flex gap-4">
+            <div class="w-full">
+              <app-input label="Valor tasa" type="number" step="0.01" [hasLeftIcon]="true" formControlName="rateValue">
+                <span left-icon class="text-sm font-medium">%</span>
+              </app-input>
+            </div>
+
+            @if (financingForm.value.rateType === 'Nominal') {
+              <div class="w-full animate-fade-in flex flex-col gap-1.5">
+                <label class="text-sm font-medium text-text-secondary">Capitalización</label>
+                <app-select [options]="capitalizationOptions" formControlName="capitalization"></app-select>
+              </div>
+            }
+          </div>
         </div>
+
       </div>
 
-      <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-4">
+      <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-text-primary">Período de Gracia</h3>
           <app-segmented-toggle [options]="gracePeriodOptions" [buttonStyle]="true" formControlName="gracePeriodType"></app-segmented-toggle>
@@ -90,7 +153,7 @@
             @for (box of installmentBoxes; track box.number) {
               <div class="flex flex-col items-center gap-1">
                 <div
-                  class="h-9 w-full flex items-center justify-center text-[11px] font-semibold rounded-sm border"
+                  class="h-9 w-full flex items-center justify-center text-[11px] font-semibold rounded-none border"
                   [ngClass]="{
                     'bg-total/15 border-total text-total': box.type === 'total',
                     'bg-success/15 border-success text-success': box.type === 'parcial',
@@ -108,36 +171,57 @@
         </div>
       </div>
 
-      <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-4">
+      <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-4">
         <h3 class="text-base font-semibold text-text-primary">Observaciones</h3>
-        <app-textarea placeholder="Añadir notas internas o condiciones especiales para el analista..." [rounded]="true" formControlName="observations"></app-textarea>
+        <app-textarea placeholder="Añadir notas internas o condiciones especiales para el analista..." formControlName="observations"></app-textarea>
       </div>
+
+      <details class="bg-surface border border-border-base rounded-none group overflow-hidden">
+        <summary class="font-semibold cursor-pointer list-none flex justify-between items-center p-6 bg-surface hover:bg-surface-hover transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="p-1.5 rounded-none bg-accent-soft text-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <span class="text-text-primary">Ajustes Internos de Entidad</span>
+          </div>
+          <svg class="group-open:rotate-180 transition-transform duration-300 text-text-muted" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="p-6 border-t border-border-base bg-background/30 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <app-input label="Tasa de Descuento (COK %)" type="number" step="0.01" formControlName="cok"></app-input>
+          <app-input label="Gastos Notariales" type="number" [hasLeftIcon]="true" formControlName="notaryFee">
+            <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+          </app-input>
+          <app-input label="Gastos Registrales" type="number" [hasLeftIcon]="true" formControlName="registryFee">
+            <span left-icon class="text-sm font-medium">{{ currentSymbol }}</span>
+          </app-input>
+        </div>
+      </details>
 
     </div>
 
     <app-financial-summary
       [clientName]="clientName ?? 'Ninguno'"
       [vehicleName]="vehicleName ?? 'Ninguno'"
-      [totalPrice]="vehiclePriceLabel"
-      [downPayment]="downPaymentLabel"
-      [downPaymentPercent]="downPaymentPercentLabel"
-      [financedAmount]="financingForm.getRawValue().financedAmount"
+      [totalPrice]="summaryVehiclePrice"
+      [downPayment]="summaryDownPayment"
+      [downPaymentPercent]="financingForm.getRawValue().downPaymentPercent + '%'"
+      [financedAmount]="summaryFinancedAmount"
       [term]="financingForm.value.installments"
-      [tea]="teaLabel"
-      notaryFee="S/ 480"
-      registryFee="S/ 210"
-      [additionalCosts]="estimatedInsuranceCosts"
-      estimatedInstallment="S/ 1,850"
+      [rateTypeLabel]="rateTypeLabel"
+      [rateValue]="rateValueLabel"
+      [balloonAmount]="summaryBalloonAmount"
+      [notaryFee]="summaryNotary"
+      [registryFee]="summaryRegistry"
+      [estimatedInstallment]="currentSymbol + ' 1,850'"
     ></app-financial-summary>
 
   </form>
-
 </div>
 
 <app-simulation-footer
   [clientName]="clientName"
   [vehicleName]="vehicleName"
-  [basePrice]="vehiclePriceLabel"
+  [basePrice]="summaryVehiclePrice"
   (back)="onBack()"
   (continue)="onFooterContinue()"
 ></app-simulation-footer>

@@ -9,20 +9,26 @@ import { Client } from '../../../../core/models/client.model';
   standalone: true,
   imports: [CommonModule, FormsModule, InputComponent],
   template: `
-    <div class="bg-surface border border-border-base rounded-lg flex flex-col h-full overflow-hidden transition-colors duration-300">
-      <div class="p-5 flex flex-col gap-4 border-b border-border-base">
+    <div class="bg-surface border border-border-base rounded-none flex flex-col h-full overflow-hidden transition-colors duration-300">
+
+      <!-- 1. Cambiamos p-3 por pl-3 py-3 pr-[22px] para compensar los 10px del scrollbar -->
+      <div class="pl-3 py-3 pr-[22px] flex flex-col gap-4 border-b border-border-base">
         <h3 class="text-xs font-semibold text-text-secondary tracking-wider uppercase">Clientes registrados</h3>
-        <app-input placeholder="Buscar..." [hasLeftIcon]="true" [(ngModel)]="searchQuery">
-          <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        </app-input>
+
+        <div class="w-full">
+          <app-input placeholder="Buscar..." [hasLeftIcon]="true" [(ngModel)]="searchQuery">
+            <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </app-input>
+        </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto max-h-[520px] p-3 flex flex-col gap-2">
+      <!-- 2. Cambiamos overflow-y-auto por overflow-y-scroll para mantener la alineación siempre -->
+      <div class="flex-1 overflow-y-scroll max-h-[520px] p-3 flex flex-col gap-2">
         @for (client of filteredClients(); track client.id) {
           <button
             type="button"
             (click)="select.emit(client)"
-            class="w-full text-left px-4 py-3 rounded-md border transition-colors duration-200 hover:bg-surface-hover hover:border-border-strong"
+            class="w-full text-left px-4 py-3 rounded-none border transition-colors duration-200 hover:bg-surface-hover hover:border-border-strong"
             [ngClass]="selectedId() === client.id
               ? 'bg-surface-hover border-border-strong'
               : 'bg-surface-elevated/60 border-border-base'"

@@ -9,7 +9,7 @@ import { BadgeComponent } from '../../../../shared/ui/badge/badge.component';
   standalone: true,
   imports: [CommonModule, FormsModule, SwitchComponent, BadgeComponent],
   template: `
-    <div class="bg-surface border border-border-base rounded-md p-6 flex flex-col gap-4 transition-colors duration-300">
+    <div class="bg-surface border border-border-base rounded-none p-6 flex flex-col gap-4 transition-colors duration-300">
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 rounded-md bg-surface-hover border border-border-base flex items-center justify-center text-text-secondary shrink-0">

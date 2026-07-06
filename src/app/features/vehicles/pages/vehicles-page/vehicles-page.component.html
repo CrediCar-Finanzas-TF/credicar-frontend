@@ -72,10 +72,15 @@
         <h2 class="text-3xl font-bold text-text-primary">{{ selectedVehicle.model }}</h2>
         <p class="text-sm text-text-secondary mb-4">{{ selectedVehicle.version }}</p>
 
-        <div class="flex items-end gap-3 mb-8">
-          <span class="text-2xl font-bold text-text-primary">{{ selectedVehicle.price }}</span>
+        <div class="flex flex-col mb-8">
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl font-bold text-text-primary">{{ selectedVehicle.price }}</span>
+            @if (selectedVehicle.priceUsd) {
+              <span class="text-sm font-medium text-text-muted">≈ {{ selectedVehicle.priceUsd }}</span>
+            }
+          </div>
           @if (selectedVehicle.oldPrice) {
-            <span class="text-sm text-text-muted line-through mb-1">{{ selectedVehicle.oldPrice }}</span>
+            <span class="text-sm text-text-muted line-through mt-1">{{ selectedVehicle.oldPrice }}</span>
           }
         </div>
 

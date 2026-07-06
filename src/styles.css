@@ -36,6 +36,7 @@
   --color-warning: #facc15;
   --color-danger: #ef4444;
   --color-info: #38bdf8;
+  --color-total: #a855f7;
 
   /* Sombras */
   --shadow-sm: var(--shadow-sm-val);

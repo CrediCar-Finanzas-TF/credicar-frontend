@@ -72,11 +72,39 @@
 
         <div class="flex flex-col gap-2">
           <div class="flex justify-between text-xs text-text-muted">
-            <span>Meses: {{ financingForm.value.gracePeriodMonths }}</span>
-            <span>Max: 6</span>
+            <span>Meses: {{ activeGracePeriodMonths }}</span>
+            <span>{{ maxGraceTotal }}</span>
           </div>
-          <input type="range" min="0" max="6" formControlName="gracePeriodMonths" class="w-full accent-accent cursor-pointer">
-          <p class="text-xs text-text-muted">Durante este periodo solo se pagarán intereses y comisiones.</p>
+
+          @if (financingForm.value.gracePeriodType === 'Total') {
+            <input type="range" min="0" [attr.max]="maxForTotalSlider" formControlName="gracePeriodMonthsTotal" class="w-full accent-accent cursor-pointer">
+          } @else {
+            <input type="range" min="0" [attr.max]="maxForParcialSlider" formControlName="gracePeriodMonthsParcial" class="w-full accent-accent cursor-pointer">
+          }
+
+          <p class="text-xs text-text-muted">Durante este periodo solo se pagarán intereses y comisiones. Mínimo {{ minServiceInstallments }} cuotas deben destinarse a amortización real (75% del plazo).</p>
+        </div>
+
+        <div class="pt-2">
+          <div class="grid gap-1.5" [style.grid-template-columns]="'repeat(' + installmentBoxes.length + ', minmax(0, 1fr))'">
+            @for (box of installmentBoxes; track box.number) {
+              <div class="flex flex-col items-center gap-1">
+                <div
+                  class="h-9 w-full flex items-center justify-center text-[11px] font-semibold rounded-sm border"
+                  [ngClass]="{
+                    'bg-total/15 border-total text-total': box.type === 'total',
+                    'bg-success/15 border-success text-success': box.type === 'parcial',
+                    'bg-surface-elevated border-border-base text-text-muted': box.type === 'standard'
+                  }"
+                >
+                  {{ box.number }}
+                </div>
+                <span class="text-[10px] text-text-muted">
+                  {{ box.type === 'total' ? 'T' : box.type === 'parcial' ? 'P' : 'S' }}
+                </span>
+              </div>
+            }
+          </div>
         </div>
       </div>
 

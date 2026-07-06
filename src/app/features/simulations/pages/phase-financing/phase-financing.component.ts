@@ -35,7 +35,7 @@ export class PhaseFinancingComponent {
   currencyOptions = ['S/', 'USD'];
   modalityOptions = ['Compra inteligente', 'Tradicional'];
   rateTypeOptions = ['Efectiva', 'Nominal'];
-  gracePeriodOptions = ['Sin gracia', 'Parcial', 'Total'];
+  gracePeriodOptions = ['Parcial', 'Total'];
   installmentOptions = ['12 meses', '24 meses', '36 meses', '48 meses', '60 meses'];
 
   financingForm: FormGroup;
@@ -54,9 +54,34 @@ export class PhaseFinancingComponent {
       rateType: ['Efectiva'],
       rateValue: [14.5],
       gracePeriodType: ['Parcial'],
-      gracePeriodMonths: [2],
+      gracePeriodMonthsParcial: [2],
+      gracePeriodMonthsTotal: [2],
       observations: ['']
     });
+
+    this.financingForm.get('installments')!.valueChanges.subscribe(() => this.clampGracePeriods());
+    this.financingForm.get('gracePeriodMonthsTotal')!.valueChanges.subscribe(() => this.clampGracePeriods());
+    this.financingForm.get('gracePeriodMonthsParcial')!.valueChanges.subscribe(() => this.clampGracePeriods());
+
+    this.clampGracePeriods();
+  }
+
+  private clampGracePeriods() {
+    const max = this.maxGraceTotal;
+    const totalCtrl = this.financingForm.get('gracePeriodMonthsTotal')!;
+    const parcialCtrl = this.financingForm.get('gracePeriodMonthsParcial')!;
+
+    let total = Number(totalCtrl.value) || 0;
+    let parcial = Number(parcialCtrl.value) || 0;
+
+    if (total > max) {
+      total = max;
+      totalCtrl.setValue(total, { emitEvent: false });
+    }
+    if (total + parcial > max) {
+      parcial = Math.max(max - total, 0);
+      parcialCtrl.setValue(parcial, { emitEvent: false });
+    }
   }
 
   get vehiclePriceValue(): number {
@@ -81,6 +106,48 @@ export class PhaseFinancingComponent {
 
   get teaLabel(): string {
     return (Number(this.financingForm.value.rateValue) || 0) + '%';
+  }
+
+  get activeGracePeriodMonths(): number {
+    return this.financingForm.value.gracePeriodType === 'Total'
+      ? Number(this.financingForm.value.gracePeriodMonthsTotal) || 0
+      : Number(this.financingForm.value.gracePeriodMonthsParcial) || 0;
+  }
+
+  get totalInstallmentsCount(): number {
+    const raw = this.financingForm.value.installments as string;
+    return parseInt(raw, 10) || 0;
+  }
+
+  get maxGraceTotal(): number {
+    return Math.min(Math.floor(this.totalInstallmentsCount * 0.25), 12);
+  }
+
+  get minServiceInstallments(): number {
+    return Math.ceil(this.totalInstallmentsCount * 0.75);
+  }
+
+  get maxForTotalSlider(): number {
+    const parcial = Number(this.financingForm.value.gracePeriodMonthsParcial) || 0;
+    return Math.max(this.maxGraceTotal - parcial, 0);
+  }
+
+  get maxForParcialSlider(): number {
+    const total = Number(this.financingForm.value.gracePeriodMonthsTotal) || 0;
+    return Math.max(this.maxGraceTotal - total, 0);
+  }
+
+  get installmentBoxes(): { number: number; type: 'total' | 'parcial' | 'standard' }[] {
+    const totalMonths = Number(this.financingForm.value.gracePeriodMonthsTotal) || 0;
+    const parcialMonths = Number(this.financingForm.value.gracePeriodMonthsParcial) || 0;
+    const boxCount = Math.max(this.maxGraceTotal, 1);
+
+    return Array.from({ length: boxCount }, (_, i) => {
+      const position = i + 1;
+      if (position <= totalMonths) return { number: position, type: 'total' as const };
+      if (position <= totalMonths + parcialMonths) return { number: position, type: 'parcial' as const };
+      return { number: position, type: 'standard' as const };
+    });
   }
 
   get estimatedInsuranceCosts(): SummaryCostLine[] {

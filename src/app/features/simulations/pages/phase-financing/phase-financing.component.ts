@@ -12,6 +12,7 @@ import { SelectComponent } from '../../../../shared/ui/select/select.component';
 import { SegmentedToggleComponent } from '../../../../shared/ui/segmented-toggle/segmented-toggle.component';
 import { TextareaComponent } from '../../../../shared/ui/textarea/textarea.component';
 import { SimulationStore } from '../../store/simulation.store';
+import { FinancingConfig } from '../../models/financing.model';
 
 @Component({
   selector: 'app-phase-financing',
@@ -36,7 +37,7 @@ export class PhaseFinancingComponent implements OnInit {
   currencyOptions = ['S/', 'USD'];
   modalityOptions = ['Tradicional', 'Compra inteligente'];
   rateTypeOptions = ['Efectiva', 'Nominal'];
-  capitalizationOptions = ['Diaria', 'Quincenal', 'Mensual', 'Bimestral', 'Trimestral', 'Semestral'];
+  capitalizationOptions = ['Diaria', 'Mensual', 'Trimestral', 'Semestral', 'Anual'];
   gracePeriodOptions = ['Parcial', 'Total'];
   installmentOptions = ['12 meses', '24 meses', '36 meses', '48 meses', '60 meses'];
 
@@ -60,7 +61,6 @@ export class PhaseFinancingComponent implements OnInit {
       downPaymentAmount: [0, [Validators.required, Validators.min(0)]],
       downPaymentPercent: [20, [Validators.required, Validators.min(10), Validators.max(80)]],
 
-      // Nuevos campos separados
       assetFinancedBalance: [{ value: 0, disabled: true }],
       totalLoanAmount: [{ value: 0, disabled: true }],
 
@@ -75,8 +75,7 @@ export class PhaseFinancingComponent implements OnInit {
       capitalization: ['Mensual'],
 
       gracePeriodType: ['Parcial'],
-      gracePeriodMonthsParcial: [0],
-      gracePeriodMonthsTotal: [0],
+      gracePeriodMonths: [0],
 
       cok: [12.5, [Validators.required, Validators.min(0)]],
       notaryFee: [this.baseNotarySoles, [Validators.required, Validators.min(0)]],
@@ -166,11 +165,9 @@ export class PhaseFinancingComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.calculateFinancedAmount());
 
     this.financingForm.get('installments')?.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.clampGracePeriods());
-    this.financingForm.get('gracePeriodMonthsTotal')?.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.clampGracePeriods());
-    this.financingForm.get('gracePeriodMonthsParcial')?.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.clampGracePeriods());
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.clampGracePeriod());
+    this.financingForm.get('gracePeriodMonths')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.clampGracePeriod());
   }
 
   private recalculateAll(newCurrency?: string) {
@@ -207,10 +204,7 @@ export class PhaseFinancingComponent implements OnInit {
     const notary = Number(this.financingForm.getRawValue().notaryFee) || 0;
     const registry = Number(this.financingForm.getRawValue().registryFee) || 0;
 
-    // 1. Saldo a financiar del activo = Precio - Cuota Inicial
     const assetBalance = Math.max(price - downPayment, 0);
-
-    // 2. Monto del préstamo = Saldo del activo + Costos iniciales
     const totalLoan = assetBalance + notary + registry;
 
     this.financingForm.patchValue({
@@ -219,21 +213,13 @@ export class PhaseFinancingComponent implements OnInit {
     }, { emitEvent: false });
   }
 
-  private clampGracePeriods() {
+  private clampGracePeriod() {
     const max = this.maxGraceTotal;
-    const totalCtrl = this.financingForm.get('gracePeriodMonthsTotal')!;
-    const parcialCtrl = this.financingForm.get('gracePeriodMonthsParcial')!;
+    const monthsCtrl = this.financingForm.get('gracePeriodMonths')!;
+    const months = Number(monthsCtrl.value) || 0;
 
-    let total = Number(totalCtrl.value) || 0;
-    let parcial = Number(parcialCtrl.value) || 0;
-
-    if (total > max) {
-      total = max;
-      totalCtrl.setValue(total, { emitEvent: false });
-    }
-    if (total + parcial > max) {
-      parcial = Math.max(max - total, 0);
-      parcialCtrl.setValue(parcial, { emitEvent: false });
+    if (months > max) {
+      monthsCtrl.setValue(max, { emitEvent: false });
     }
   }
 
@@ -273,32 +259,17 @@ export class PhaseFinancingComponent implements OnInit {
   get summaryRegistry() { return this.formatCurrency(Number(this.financingForm.getRawValue().registryFee) || 0); }
 
   get vehiclePriceLabel(): string { return this.summaryVehiclePrice; }
-  get activeGracePeriodMonths(): number {
-    return this.financingForm.getRawValue().gracePeriodType === 'Total'
-      ? Number(this.financingForm.getRawValue().gracePeriodMonthsTotal) || 0
-      : Number(this.financingForm.getRawValue().gracePeriodMonthsParcial) || 0;
-  }
 
   get totalInstallmentsCount(): number { return parseInt(this.financingForm.getRawValue().installments, 10) || 0; }
   get maxGraceTotal(): number { return Math.min(Math.floor(this.totalInstallmentsCount * 0.25), 12); }
   get minServiceInstallments(): number { return Math.ceil(this.totalInstallmentsCount * 0.75); }
 
-  get maxForTotalSlider(): number {
-    return Math.max(this.maxGraceTotal - (Number(this.financingForm.getRawValue().gracePeriodMonthsParcial) || 0), 0);
-  }
-
-  get maxForParcialSlider(): number {
-    return Math.max(this.maxGraceTotal - (Number(this.financingForm.getRawValue().gracePeriodMonthsTotal) || 0), 0);
-  }
-
   get installmentBoxes(): { number: number; type: 'total' | 'parcial' | 'standard' }[] {
-    const totalMonths = Number(this.financingForm.getRawValue().gracePeriodMonthsTotal) || 0;
-    const parcialMonths = Number(this.financingForm.getRawValue().gracePeriodMonthsParcial) || 0;
+    const graceMonths = Number(this.financingForm.getRawValue().gracePeriodMonths) || 0;
+    const graceType = this.financingForm.getRawValue().gracePeriodType === 'Total' ? 'total' : 'parcial';
     return Array.from({ length: Math.max(this.maxGraceTotal, 1) }, (_, i) => {
       const pos = i + 1;
-      if (pos <= totalMonths) return { number: pos, type: 'total' as const };
-      if (pos <= totalMonths + parcialMonths) return { number: pos, type: 'parcial' as const };
-      return { number: pos, type: 'standard' as const };
+      return { number: pos, type: pos <= graceMonths ? (graceType as 'total' | 'parcial') : 'standard' };
     });
   }
 
@@ -310,22 +281,30 @@ export class PhaseFinancingComponent implements OnInit {
   get vehicleName(): string | null { return this.simulationStore.selectedVehicle()?.model ?? null; }
 
   onBack() { this.router.navigate(['/simulations/vehicle']); }
+
   onFooterContinue() {
-    if ((this.simulationStore as any).setFinancingData) {
-      (this.simulationStore as any).setFinancingData({
-        totalPrice: this.summaryVehiclePrice,
-        downPayment: this.summaryDownPayment,
-        downPaymentPercent: this.financingForm.getRawValue().downPaymentPercent + '%',
-        financedAmount: this.summaryFinancedAmount, // Aquí enviamos el totalLoanAmount
-        term: this.financingForm.getRawValue().installments,
-        rateTypeLabel: this.rateTypeLabel,
-        rateValue: this.rateValueLabel,
-        balloonAmount: this.summaryBalloonAmount,
-        notaryFee: this.summaryNotary,
-        registryFee: this.summaryRegistry,
-        baseInstallment: 1850
-      });
-    }
+    const raw = this.financingForm.getRawValue();
+
+    const config: FinancingConfig = {
+      currency: raw.currency,
+      vehiclePrice: Number(raw.vehiclePrice) || 0,
+      downPaymentAmount: Number(raw.downPaymentAmount) || 0,
+      downPaymentPercent: Number(raw.downPaymentPercent) || 0,
+      financedAmount: Number(raw.totalLoanAmount) || 0,
+      totalQuotas: this.totalInstallmentsCount,
+      modality: raw.modality,
+      balloonPercent: raw.modality === 'Compra inteligente' ? Number(raw.balloonPercent) || 0 : 0,
+      rateType: raw.rateType,
+      rateValue: Number(raw.rateValue) || 0,
+      capitalization: raw.capitalization,
+      gracePeriodType: raw.gracePeriodType,
+      gracePeriodMonths: Number(raw.gracePeriodMonths) || 0,
+      cok: Number(raw.cok) || 0,
+      notaryFee: Number(raw.notaryFee) || 0,
+      registryFee: Number(raw.registryFee) || 0
+    };
+
+    this.simulationStore.setFinancingConfig(config);
     this.router.navigate(['/simulations/insurance']);
   }
 }

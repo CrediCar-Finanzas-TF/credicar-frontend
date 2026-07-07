@@ -1,12 +1,18 @@
-export interface Financing {
+export interface FinancingConfig {
   currency: 'S/' | 'USD';
-  downPayment: number | null;
-  installments: string;
-  firstPaymentDate: string;
-  modality: 'Compra inteligente' | 'Tradicional';
+  vehiclePrice: number;
+  downPaymentAmount: number;
+  downPaymentPercent: number;
+  financedAmount: number;
+  totalQuotas: number;
+  modality: 'Tradicional' | 'Compra inteligente';
+  balloonPercent: number;
   rateType: 'Efectiva' | 'Nominal';
-  rateValue: number | null;
-  gracePeriodType: 'Sin gracia' | 'Parcial' | 'Total';
+  rateValue: number;
+  capitalization: string;
+  gracePeriodType: 'Parcial' | 'Total';
   gracePeriodMonths: number;
-  observations: string;
+  cok: number;
+  notaryFee: number;
+  registryFee: number;
 }

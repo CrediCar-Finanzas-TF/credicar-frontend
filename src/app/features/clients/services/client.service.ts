@@ -11,13 +11,22 @@ export class ClientService {
   private baseUrl = `${environment.apiUrl}/clients`;
 
   searchClients(search: string, page = 0, size = 20): Observable<Client[]> {
+    return this.searchClientsPage(search, page, size).pipe(
+      map(pageResponse => pageResponse.content)
+    );
+  }
+
+  searchClientsPage(search: string, page = 0, size = 20): Observable<PageResponse<Client>> {
     const params = new HttpParams()
       .set('search', search)
       .set('page', page)
       .set('size', size);
 
     return this.http.get<PageResponse<ClientResponse>>(this.baseUrl, { params }).pipe(
-      map(pageResponse => pageResponse.content.map(response => this.toClient(response)))
+      map(pageResponse => ({
+        ...pageResponse,
+        content: pageResponse.content.map(response => this.toClient(response))
+      }))
     );
   }
 

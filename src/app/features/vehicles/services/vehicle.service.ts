@@ -19,6 +19,7 @@ export class VehicleService {
     const isPen = response.priceCurrency === 'PEN';
 
     return {
+      id: response.id,
       id_vehiculo: response.businessId ?? String(response.id),
       image: response.imageUrl,
       brand: response.brand,

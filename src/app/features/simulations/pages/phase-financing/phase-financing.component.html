@@ -135,15 +135,11 @@
 
         <div class="flex flex-col gap-2">
           <div class="flex justify-between text-xs text-text-muted">
-            <span>Meses: {{ activeGracePeriodMonths }}</span>
+            <span>Meses: {{ financingForm.value.gracePeriodMonths }}</span>
             <span>{{ maxGraceTotal }}</span>
           </div>
 
-          @if (financingForm.value.gracePeriodType === 'Total') {
-            <input type="range" min="0" [attr.max]="maxForTotalSlider" formControlName="gracePeriodMonthsTotal" class="w-full accent-accent cursor-pointer">
-          } @else {
-            <input type="range" min="0" [attr.max]="maxForParcialSlider" formControlName="gracePeriodMonthsParcial" class="w-full accent-accent cursor-pointer">
-          }
+          <input type="range" min="0" [attr.max]="maxGraceTotal" formControlName="gracePeriodMonths" class="w-full accent-accent cursor-pointer">
 
           <p class="text-xs text-text-muted">Durante este periodo solo se pagarán intereses y comisiones. Mínimo {{ minServiceInstallments }} cuotas deben destinarse a amortización real (75% del plazo).</p>
         </div>

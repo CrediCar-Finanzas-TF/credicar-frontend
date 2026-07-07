@@ -21,5 +21,9 @@ export const simulationsRoutes: Routes = [
   {
     path: 'insurance',
     loadComponent: () => import('./pages/phase-insurance/phase-insurance.component').then(m => m.PhaseInsuranceComponent)
+  },
+  {
+    path: 'result',
+    loadComponent: () => import('./pages/phase-result/phase-result.component').then(m => m.PhaseResultComponent)
   }
 ];

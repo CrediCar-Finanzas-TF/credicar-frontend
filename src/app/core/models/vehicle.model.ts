@@ -1,4 +1,5 @@
 export interface Vehicle {
+  id?: number;
   id_vehiculo?: string;
   status?: string;
   image: string;

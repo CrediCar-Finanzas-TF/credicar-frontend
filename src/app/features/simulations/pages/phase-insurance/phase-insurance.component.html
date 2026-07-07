@@ -49,6 +49,30 @@
         </div>
       </div>
 
+      @for (coverage of optionalCoverages(); track coverage.id) {
+        <app-insurance-coverage-card
+          [title]="coverage.title"
+          [description]="coverage.description"
+          [monthlyCostLabel]="formatCoverageCost(coverage.monthlyCost)"
+          [active]="coverage.active"
+          (activeChange)="toggleCoverage(coverage.id, $event)"
+        >
+          <span icon>
+            @switch (coverage.id) {
+              @case ('roadsideAssistance') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              }
+              @case ('extendedWarranty') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              }
+              @case ('unemploymentInsurance') {
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              }
+            }
+          </span>
+        </app-insurance-coverage-card>
+      }
+
       @if (errorMessage()) {
         <p class="text-sm text-danger">{{ errorMessage() }}</p>
       }

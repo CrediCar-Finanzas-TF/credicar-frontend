@@ -6,6 +6,7 @@ import { ProgressStepperComponent } from '../../../../shared/components/progress
 import { SimulationHeaderComponent } from '../../components/simulation-header/simulation-header.component';
 import { SimulationFooterComponent } from '../../components/simulation-footer/simulation-footer.component';
 import { FinancialSummaryComponent, SummaryCostLine } from '../../components/financial-summary/financial-summary.component';
+import { InsuranceCoverageCardComponent } from '../../components/insurance-coverage-card/insurance-coverage-card.component';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { SimulationStore } from '../../store/simulation.store';
 import { QuotationService } from '../../services/quotation.service';
@@ -18,6 +19,14 @@ import {
   RATE_TYPE_MAP
 } from '../../../../core/models/quotation.model';
 
+interface OptionalCoverage {
+  id: 'roadsideAssistance' | 'extendedWarranty' | 'unemploymentInsurance';
+  title: string;
+  description: string;
+  monthlyCost: number;
+  active: boolean;
+}
+
 @Component({
   selector: 'app-phase-insurance',
   standalone: true,
@@ -28,6 +37,7 @@ import {
     SimulationHeaderComponent,
     SimulationFooterComponent,
     FinancialSummaryComponent,
+    InsuranceCoverageCardComponent,
     InputComponent
   ],
   templateUrl: './phase-insurance.component.html'
@@ -48,6 +58,30 @@ export class PhaseInsuranceComponent {
     vehicularInsuranceMonthly: [240, [Validators.required, Validators.min(0)]]
   });
 
+  optionalCoverages = signal<OptionalCoverage[]>([
+    {
+      id: 'roadsideAssistance',
+      title: 'Asistencia Vial 24/7',
+      description: 'Grúa, cambio de llanta, paso de corriente y auxilio mecánico en cualquier momento del día, en caso de imprevistos en la vía.',
+      monthlyCost: 15,
+      active: false
+    },
+    {
+      id: 'extendedWarranty',
+      title: 'Garantía Extendida del Vehículo',
+      description: 'Cubre fallas mecánicas y eléctricas del vehículo una vez vencida la garantía de fábrica, sin costo adicional por reparación.',
+      monthlyCost: 45,
+      active: false
+    },
+    {
+      id: 'unemploymentInsurance',
+      title: 'Seguro de Desempleo',
+      description: 'Cubre hasta 3 cuotas del crédito en caso de pérdida involuntaria del empleo, mientras el cliente encuentra una nueva fuente de ingresos.',
+      monthlyCost: 25,
+      active: false
+    }
+  ]);
+
   get clientName(): string | null {
     const client = this.simulationStore.selectedClient();
     return client ? `${client.firstName} ${client.lastName}` : null;
@@ -63,6 +97,21 @@ export class PhaseInsuranceComponent {
 
   private formatCurrency(value: number): string {
     return `${this.symbol} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  formatCoverageCost(value: number): string {
+    return this.formatCurrency(value);
+  }
+
+  toggleCoverage(id: OptionalCoverage['id'], active: boolean) {
+    this.optionalCoverages.update(list =>
+      list.map(coverage => coverage.id === id ? { ...coverage, active } : coverage)
+    );
+  }
+
+  private coverageCost(id: OptionalCoverage['id']): number {
+    const coverage = this.optionalCoverages().find(c => c.id === id);
+    return coverage?.active ? coverage.monthlyCost : 0;
   }
 
   // Reconstruye los datos de resumen a partir de la configuración cruda guardada por la fase de Financiamiento.
@@ -110,10 +159,16 @@ export class PhaseInsuranceComponent {
     const vehicularMonthly = Number(this.insuranceForm.value.vehicularInsuranceMonthly) || 0;
     const desgravamenEstimate = (config?.financedAmount ?? 0) * (desgravamenRate / 100);
 
-    return [
+    const lines: SummaryCostLine[] = [
       { label: 'Seguro Desgravamen (aprox. 1ra cuota)', value: this.formatCurrency(desgravamenEstimate) },
       { label: 'Seguro Vehicular', value: this.formatCurrency(vehicularMonthly) }
     ];
+
+    this.optionalCoverages().filter(c => c.active).forEach(c => {
+      lines.push({ label: c.title, value: this.formatCurrency(c.monthlyCost) });
+    });
+
+    return lines;
   }
 
   // Estimado referencial (cuota francesa) mientras se confirma con el backend en /quotations.
@@ -129,8 +184,11 @@ export class PhaseInsuranceComponent {
     const desgravamenRate = Number(this.insuranceForm.value.desgravamenRate) || 0;
     const vehicularMonthly = Number(this.insuranceForm.value.vehicularInsuranceMonthly) || 0;
     const desgravamenEstimate = config.financedAmount * (desgravamenRate / 100);
+    const optionalCoveragesTotal = this.optionalCoverages()
+      .filter(c => c.active)
+      .reduce((sum, c) => sum + c.monthlyCost, 0);
 
-    return this.formatCurrency(baseQuota + vehicularMonthly + desgravamenEstimate);
+    return this.formatCurrency(baseQuota + vehicularMonthly + desgravamenEstimate + optionalCoveragesTotal);
   }
 
   private calculateTEM(rateType: string, percentage: number, capitalization: string): number {
@@ -179,8 +237,18 @@ export class PhaseInsuranceComponent {
       gracePeriodMonths: config.gracePeriodMonths,
       desgravamenRate: Number(this.insuranceForm.value.desgravamenRate) || 0,
       vehicularInsuranceMonthly: Number(this.insuranceForm.value.vehicularInsuranceMonthly) || 0,
-      additionalExpenses: config.notaryFee + config.registryFee,
-      balloonPaymentPercentage: config.modality === 'Compra inteligente' ? config.balloonPercent / 100 : 0,
+      roadsideAssistanceMonthly: this.coverageCost('roadsideAssistance'),
+      extendedWarrantyMonthly: this.coverageCost('extendedWarranty'),
+      unemploymentInsuranceMonthly: this.coverageCost('unemploymentInsurance'),
+      // Notaría/registro ya están incluidos en "financedAmount" (se financian dentro del préstamo,
+      // igual que en el método francés estándar), así que no se vuelven a cobrar aparte aquí.
+      additionalExpenses: 0,
+      // El backend aplica este % sobre financingAmount, pero la cuota balón se define como % del
+      // PRECIO DEL VEHÍCULO (convención estándar de "Compra Inteligente"). Se ajusta la fracción
+      // para que el monto resultante (financingAmount * fracción) sea igual a vehiclePrice * balloonPercent.
+      balloonPaymentPercentage: config.modality === 'Compra inteligente'
+        ? (config.vehiclePrice * (config.balloonPercent / 100)) / config.financedAmount
+        : 0,
       cokPercentage: config.cok
     };
 

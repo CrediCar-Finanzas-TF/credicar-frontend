@@ -37,6 +37,9 @@ export class PhaseResultComponent implements OnInit {
     { field: 'amortization', header: 'Amortización' },
     { field: 'desgravamenInsurance', header: 'Seg. Desgravamen' },
     { field: 'vehicularInsurance', header: 'Seg. Vehicular' },
+    { field: 'roadsideAssistance', header: 'Asist. Vial' },
+    { field: 'extendedWarranty', header: 'Garantía Ext.' },
+    { field: 'unemploymentInsurance', header: 'Seg. Desempleo' },
     { field: 'additionalExpenses', header: 'Gastos Adic.' },
     { field: 'monthlyQuota', header: 'Cuota' },
     { field: 'finalBalance', header: 'Saldo Final' }

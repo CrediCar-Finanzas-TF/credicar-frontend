@@ -13,6 +13,9 @@ export interface QuotationRequest {
   gracePeriodMonths: number;
   desgravamenRate: number;
   vehicularInsuranceMonthly: number;
+  roadsideAssistanceMonthly: number;
+  extendedWarrantyMonthly: number;
+  unemploymentInsuranceMonthly: number;
   additionalExpenses: number;
   balloonPaymentPercentage: number;
   cokPercentage: number;
@@ -27,6 +30,9 @@ export interface PaymentScheduleItem {
   interest: number;
   desgravamenInsurance: number;
   vehicularInsurance: number;
+  roadsideAssistance: number;
+  extendedWarranty: number;
+  unemploymentInsurance: number;
   additionalExpenses: number;
   monthlyQuota: number;
   finalBalance: number;
@@ -49,6 +55,9 @@ export interface Quotation {
   gracePeriodMonths: number;
   desgravamenRate: number;
   vehicularInsuranceMonthly: number;
+  roadsideAssistanceMonthly: number;
+  extendedWarrantyMonthly: number;
+  unemploymentInsuranceMonthly: number;
   van: number;
   tir: number;
   tcea: number;

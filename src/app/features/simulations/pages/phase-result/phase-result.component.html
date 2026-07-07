@@ -15,7 +15,7 @@
         [data]="simulationStore.quotation()?.schedule ?? []"
         [showPagination]="false"
         [rowsLimit]="200"
-        minWidth="min-w-[1100px]"
+        minWidth="min-w-[1500px]"
       >
         <ng-template #bodyTpl let-row let-col="col">
           @switch (col.field) {
@@ -36,6 +36,15 @@
             }
             @case ('vehicularInsurance') {
               <span class="text-sm text-text-secondary">{{ formatMoney(row.vehicularInsurance, row.currency) }}</span>
+            }
+            @case ('roadsideAssistance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.roadsideAssistance, row.currency) }}</span>
+            }
+            @case ('extendedWarranty') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.extendedWarranty, row.currency) }}</span>
+            }
+            @case ('unemploymentInsurance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.unemploymentInsurance, row.currency) }}</span>
             }
             @case ('additionalExpenses') {
               <span class="text-sm text-text-secondary">{{ formatMoney(row.additionalExpenses, row.currency) }}</span>

@@ -1,13 +1,25 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Client, ClientRequest, ClientResponse } from '../../../core/models/client.model';
+import { PageResponse } from '../../../core/models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/clients`;
+
+  searchClients(search: string, page = 0, size = 20): Observable<Client[]> {
+    const params = new HttpParams()
+      .set('search', search)
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<PageResponse<ClientResponse>>(this.baseUrl, { params }).pipe(
+      map(pageResponse => pageResponse.content.map(response => this.toClient(response)))
+    );
+  }
 
   createClient(client: Client): Observable<Client> {
     const request: ClientRequest = {

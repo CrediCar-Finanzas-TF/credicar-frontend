@@ -9,7 +9,6 @@
 
   <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
     <app-client-list
-      [clients]="registeredClients"
       [selectedId]="selectedClient()?.id ?? null"
       (select)="selectExistingClient($event)"
     ></app-client-list>

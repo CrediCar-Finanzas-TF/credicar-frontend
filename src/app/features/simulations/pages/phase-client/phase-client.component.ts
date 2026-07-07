@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProgressStepperComponent } from '../../../../shared/components/progress-stepper/progress-stepper.component';
@@ -23,7 +23,7 @@ import { ClientService } from '../../../clients/services/client.service';
   ],
   templateUrl: './phase-client.component.html'
 })
-export class PhaseClientComponent implements OnInit, AfterViewInit {
+export class PhaseClientComponent implements OnInit {
   @ViewChild(ClientFormComponent) clientFormComponent!: ClientFormComponent;
 
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
@@ -31,20 +31,6 @@ export class PhaseClientComponent implements OnInit, AfterViewInit {
   selectedClient = signal<Client | null>(null);
   isSaving = signal(false);
   errorMessage = signal('');
-
-  registeredClients: Client[] = Array(12).fill(null).map((_, index) => ({
-    id: `C-${1000 + index}`,
-    documentType: 'DNI',
-    documentNumber: '45942013',
-    firstName: 'Carlos',
-    lastName: 'Mendoza',
-    phone: '',
-    email: '',
-    address: '',
-    company: '',
-    monthlyIncome: null,
-    laborSeniority: null
-  }));
 
   constructor(
     private router: Router,
@@ -55,17 +41,7 @@ export class PhaseClientComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     const previousClient = this.simulationStore.selectedClient();
     if (previousClient) {
-      const matchInList = this.registeredClients.find(c => c.id === previousClient.id);
-      if (matchInList) {
-        this.selectedClient.set(matchInList);
-      }
-    }
-  }
-
-  ngAfterViewInit() {
-    const previousClient = this.simulationStore.selectedClient();
-    if (previousClient && !this.selectedClient()) {
-      this.clientFormComponent.patchValues(previousClient);
+      this.selectedClient.set(previousClient);
     }
   }
 

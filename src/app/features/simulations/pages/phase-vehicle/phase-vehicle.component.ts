@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { SelectComponent } from '../../../../shared/ui/select/select.component';
 import { VehicleCardComponent } from '../../../vehicles/components/vehicle-card/vehicle-card.component';
 import { Vehicle } from '../../../../core/models/vehicle.model';
 import { SimulationStore } from '../../store/simulation.store';
+import { VehicleService } from '../../../vehicles/services/vehicle.service';
 
 @Component({
   selector: 'app-phase-vehicle',
@@ -26,7 +27,9 @@ import { SimulationStore } from '../../store/simulation.store';
   ],
   templateUrl: './phase-vehicle.component.html'
 })
-export class PhaseVehicleComponent {
+export class PhaseVehicleComponent implements OnInit {
+  private vehicleService = inject(VehicleService);
+
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
 
   searchQuery = '';
@@ -35,63 +38,21 @@ export class PhaseVehicleComponent {
   modelOptions = ['Corolla Cross', 'CX-5', 'Sportage'];
   yearOptions = ['2026', '2025', '2024'];
 
-  vehicles: Vehicle[] = [
-    {
-      id_vehiculo: 'V-8472',
-      status: 'Disponible',
-      image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?q=80&w=600&auto=format&fit=crop',
-      brand: 'Toyota',
-      model: 'Corolla Cross HEV',
-      version: 'Hybrid Premium 2026',
-      features: ['Automático', 'Híbrido', 'SUV'],
-      price: 'S/ 65,000',
-      oldPrice: 'S/ 98,500',   // <--- Agregado
-      priceUsd: '$ 27,859',    // <--- Agregado
-      motor: '1.8L Híbrido',
-      transmision: 'E-CVT',
-      potencia: '122 HP',
-      traccion: 'FWD',
-      sede: 'Sede Central - Lima',
-      stock: 4
-    },
-    {
-      id_vehiculo: 'V-1029',
-      status: 'Disponible',
-      image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=600&auto=format&fit=crop',
-      brand: 'Mazda',
-      model: 'CX-5 Signature',
-      version: 'AWD 2025',
-      features: ['Automático', 'Gasolina', 'AWD'],
-      price: 'S/ 112,500',
-      priceUsd: '$ 32,990',    // <--- Agregado
-      motor: '2.5L MPI',
-      transmision: 'Automática 6 Vel.',
-      potencia: '187 HP',
-      traccion: 'AWD',
-      sede: 'Sede Central - Lima',
-      stock: 2
-    },
-    {
-      id_vehiculo: 'V-4592',
-      status: 'Disponible',
-      image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=600&auto=format&fit=crop',
-      brand: 'Kia',
-      model: 'Sportage GT-Line',
-      version: '2025',
-      features: ['Automático', 'Gasolina', 'SUV'],
-      price: 'S/ 88,000',
-      // oldPrice: ... (Puedes omitirlo si no tiene descuento y no se mostrará)
-      priceUsd: '$ 25,800',    // <--- Agregado
-      motor: '2.0L MPI',
-      transmision: 'Automática 6 Vel.',
-      potencia: '154 HP',
-      traccion: 'FWD',
-      sede: 'Sede Sur - Arequipa',
-      stock: 3
-    }
-  ];
+  isLoading = signal(false);
+  vehicles = signal<Vehicle[]>([]);
 
   constructor(private router: Router, protected simulationStore: SimulationStore) {}
+
+  ngOnInit() {
+    this.isLoading.set(true);
+    this.vehicleService.getVehicles().subscribe({
+      next: (vehicles) => {
+        this.vehicles.set(vehicles);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
 
   get clientName(): string | null {
     const client = this.simulationStore.selectedClient();

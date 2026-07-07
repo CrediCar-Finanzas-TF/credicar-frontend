@@ -42,11 +42,15 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (vehicle of vehicles; track vehicle.id_vehiculo) {
-        <app-vehicle-card
-          [vehicle]="vehicle"
-          (onViewDetail)="openVehicleDetails($event)"
-        ></app-vehicle-card>
+      @if (isLoading()) {
+        <p class="text-sm text-text-muted">Cargando vehículos...</p>
+      } @else {
+        @for (vehicle of vehicles(); track vehicle.id_vehiculo) {
+          <app-vehicle-card
+            [vehicle]="vehicle"
+            (onViewDetail)="openVehicleDetails($event)"
+          ></app-vehicle-card>
+        }
       }
     </div>
 
@@ -107,17 +111,19 @@
           </div>
         </div>
 
-        <div class="w-full h-px bg-border-base/50 mb-8"></div>
+        @if (selectedVehicle.sede || selectedVehicle.stock) {
+          <div class="w-full h-px bg-border-base/50 mb-8"></div>
 
-        <h4 class="text-xs font-semibold text-text-primary uppercase tracking-wider mb-5">Stock y Ubicación</h4>
+          <h4 class="text-xs font-semibold text-text-primary uppercase tracking-wider mb-5">Stock y Ubicación</h4>
 
-        <div class="bg-surface border border-border-base p-4 rounded-none flex justify-between items-center mb-10">
-          <div class="flex flex-col">
-            <span class="text-sm font-medium text-text-primary">{{ selectedVehicle.sede }}</span>
-            <span class="text-[11px] text-text-muted">Entrega inmediata</span>
+          <div class="bg-surface border border-border-base p-4 rounded-none flex justify-between items-center mb-10">
+            <div class="flex flex-col">
+              <span class="text-sm font-medium text-text-primary">{{ selectedVehicle.sede }}</span>
+              <span class="text-[11px] text-text-muted">Entrega inmediata</span>
+            </div>
+            <span class="text-xl font-bold text-text-primary">{{ selectedVehicle.stock }} <span class="text-xs font-normal text-text-secondary">und</span></span>
           </div>
-          <span class="text-xl font-bold text-text-primary">{{ selectedVehicle.stock }} <span class="text-xs font-normal text-text-secondary">und</span></span>
-        </div>
+        }
 
       </div>
 

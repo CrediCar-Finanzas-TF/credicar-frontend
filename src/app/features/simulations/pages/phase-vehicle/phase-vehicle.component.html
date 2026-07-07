@@ -26,12 +26,16 @@
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (vehicle of vehicles; track vehicle.id_vehiculo) {
-      <app-vehicle-card
-        [vehicle]="vehicle"
-        [selectable]="true"
-        (onSelect)="selectVehicle($event)"
-      ></app-vehicle-card>
+    @if (isLoading()) {
+      <p class="text-sm text-text-muted">Cargando vehículos...</p>
+    } @else {
+      @for (vehicle of vehicles(); track vehicle.id_vehiculo) {
+        <app-vehicle-card
+          [vehicle]="vehicle"
+          [selectable]="true"
+          (onSelect)="selectVehicle($event)"
+        ></app-vehicle-card>
+      }
     }
   </div>
 

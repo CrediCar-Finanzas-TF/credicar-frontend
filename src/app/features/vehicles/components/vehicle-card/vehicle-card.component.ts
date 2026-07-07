@@ -13,9 +13,11 @@ import { Vehicle } from '../../../../core/models/vehicle.model';
       class="bg-surface border border-border-base flex flex-col rounded-none group transition-colors duration-300 hover:border-border-strong shadow-sm h-full w-full select-none cursor-pointer"
     >
       <div class="relative h-48 w-full overflow-hidden bg-background">
-        <span class="absolute top-3 left-3 px-2 py-1 text-[10px] uppercase tracking-wider font-medium border border-border-base bg-black/60 text-white backdrop-blur-md z-10">
-          {{ vehicle().status }}
-        </span>
+        @if (vehicle().status) {
+          <span class="absolute top-3 left-3 px-2 py-1 text-[10px] uppercase tracking-wider font-medium border border-border-base bg-black/60 text-white backdrop-blur-md z-10">
+            {{ vehicle().status }}
+          </span>
+        }
         <img [src]="vehicle().image" [alt]="vehicle().model" class="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500">
         <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-50"></div>
       </div>

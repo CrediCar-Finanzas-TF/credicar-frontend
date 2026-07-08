@@ -45,6 +45,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/vehicles/pages/vehicles-page/vehicles-page.component').then(m => m.VehiclesPageComponent)
       },
       {
+        path: 'quotations',
+        loadComponent: () => import('./features/quotations/pages/quotations-page/quotations-page.component').then(m => m.QuotationsPageComponent)
+      },
+      {
+        path: 'quotations/:id',
+        loadComponent: () => import('./features/quotations/pages/quotation-detail/quotation-detail.component').then(m => m.QuotationDetailComponent)
+      },
+      {
         path: 'simulations',
         loadChildren: () => import('./features/simulations/simulations.routes').then(m => m.simulationsRoutes)
       }

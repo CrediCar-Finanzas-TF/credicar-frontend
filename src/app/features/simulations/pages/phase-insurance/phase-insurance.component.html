@@ -100,11 +100,11 @@
 </div>
 
 <app-simulation-footer
-  [clientName]="clientName"
+  [clientName]="footerClientName"
   [vehicleName]="vehicleName"
   [showBasePrice]="false"
   [continueDisabled]="isSubmitting()"
-  [continueLabel]="isSubmitting() ? 'Generando cotización...' : 'Continuar'"
+  [continueLabel]="isSubmitting() ? 'Calculando...' : 'Continuar'"
   (back)="onBack()"
   (continue)="onFooterContinue()"
 ></app-simulation-footer>

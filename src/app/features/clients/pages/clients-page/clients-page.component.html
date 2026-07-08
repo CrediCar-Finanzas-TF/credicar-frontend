@@ -6,37 +6,45 @@
       <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
     </app-metric-card>
 
-    <app-metric-card title="Clientes Cotizados" [value]="quotedClientsCount">
-      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
+    <app-metric-card title="Empresas Distintas" [value]="companiesCount">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
     </app-metric-card>
 
-    <app-metric-card title="Simulaciones Activas" [value]="activeSimulationsCount">
-      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
-    </app-metric-card>
-
-    <app-metric-card title="Monto Total Financiado" [value]="totalFinancedAmount">
+    <app-metric-card title="Ingreso Mensual Promedio" [value]="averageMonthlyIncomeLabel">
       <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+    </app-metric-card>
+
+    <app-metric-card title="Antig. Laboral Prom." [value]="averageSeniorityLabel">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </app-metric-card>
 
   </div>
 
   <div class="flex flex-col gap-6">
 
-    <div class="w-full md:w-96">
-      <app-input
-        placeholder="Buscar por nombre, DNI o teléfono..."
-        [hasLeftIcon]="true"
-        [(ngModel)]="searchQuery"
-      >
-        <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </app-input>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="w-full md:w-96">
+        <app-input
+          placeholder="Buscar por nombre, DNI o teléfono..."
+          [hasLeftIcon]="true"
+          [(ngModel)]="searchQuery"
+        >
+          <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </app-input>
+      </div>
+
+      <app-button (click)="openCreateDrawer()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Agregar cliente</span>
+      </app-button>
     </div>
+
 
     <app-data-table
       [columns]="cols"
       [data]="rows()"
-      [totalItems]="quotedClientsCount"
-      itemName="clientes cotizados"
+      [totalItems]="totalClients()"
+      itemName="clientes"
       [isLoading]="isLoading()"
       [showPagination]="false"
       [rowsLimit]="50"
@@ -50,27 +58,24 @@
           </div>
         }
 
-        @else if (col.field === 'status') {
-          <app-badge>{{ row.status }}</app-badge>
-        }
-
         @else if (col.field === 'actions') {
           <div class="flex items-center justify-end gap-1">
             <button
               type="button"
-              (click)="viewSchedule(row)"
-              class="text-text-muted hover:text-text-primary transition-colors focus:outline-none p-1.5"
-              title="Ver cronograma"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-            </button>
-            <button
-              type="button"
               (click)="openEditDrawer(row.client)"
-              class="text-text-muted hover:text-text-primary transition-colors focus:outline-none p-1.5"
+              class="text-text-muted hover:text-text-primary transition-colors focus:outline-none p-1.5 cursor-pointer"
               title="Editar cliente"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <button
+              type="button"
+              [disabled]="isCheckingDelete()"
+              (click)="requestDelete(row.client)"
+              class="text-text-muted hover:text-danger transition-colors focus:outline-none p-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Eliminar cliente"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
             </button>
           </div>
         }
@@ -84,20 +89,43 @@
   </div>
 </div>
 
-<app-drawer [isOpen]="isEditDrawerOpen()" (close)="closeEditDrawer()">
+<app-drawer [isOpen]="isDrawerOpen()" maxWidth="760px" (close)="closeDrawer()">
   <div class="flex flex-col h-full">
     <div class="flex-1 overflow-y-auto p-6">
-      <app-client-form title="Editar cliente" (continue)="onClientFormSubmit($event)"></app-client-form>
+      <app-client-form
+        [title]="drawerMode() === 'create' ? 'Registrar cliente' : 'Editar cliente'"
+        (continue)="onClientFormSubmit($event)"
+      ></app-client-form>
 
-      @if (editErrorMessage()) {
-        <p class="text-sm text-danger mt-4">{{ editErrorMessage() }}</p>
+      @if (formErrorMessage()) {
+        <p class="text-sm text-danger mt-4">{{ formErrorMessage() }}</p>
       }
     </div>
 
     <div class="p-6 border-t border-border-base">
-      <app-button [fullWidth]="true" [disabled]="isSavingEdit()" (click)="onSaveEdit()">
-        {{ isSavingEdit() ? 'Guardando...' : 'Guardar cambios' }}
+      <app-button [fullWidth]="true" [disabled]="isSavingClient()" (click)="onSaveClient()">
+        {{ isSavingClient() ? 'Guardando...' : (drawerMode() === 'create' ? 'Registrar cliente' : 'Guardar cambios') }}
       </app-button>
     </div>
   </div>
 </app-drawer>
+
+<app-confirm-dialog
+  [isOpen]="isConfirmDeleteOpen()"
+  title="Eliminar cliente"
+  [message]="'¿Seguro que quieres eliminar a ' + pendingDeleteClientName + '? Esta acción no se puede deshacer.'"
+  [confirmLabel]="isDeleting() ? 'Eliminando...' : 'Eliminar'"
+  [confirmDisabled]="isDeleting()"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"
+></app-confirm-dialog>
+
+@if (deleteErrorMessage()) {
+  <div
+    class="fixed bottom-6 right-6 z-50 max-w-sm bg-surface border border-danger/40 shadow-2xl p-4 transition-opacity duration-300 ease-in"
+    [class.animate-slide-up]="deleteToastVisible()"
+    [class.opacity-0]="!deleteToastVisible()"
+  >
+    <p class="text-sm text-danger">{{ deleteErrorMessage() }}</p>
+  </div>
+}

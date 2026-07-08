@@ -1,4 +1,4 @@
-import { Component, input, forwardRef, signal } from '@angular/core';
+import { Component, input, output, forwardRef, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -34,6 +34,7 @@ import { CommonModule } from '@angular/common';
           [attr.step]="step() || null"
           [(ngModel)]="value"
           (input)="onInput($event)"
+          (focus)="focus.emit()"
           (blur)="onTouched()"
           class="w-full bg-transparent border border-border-base text-text-primary text-sm py-2.5 transition-all duration-200 focus:outline-none focus:border-border-strong focus:bg-glass-hover disabled:opacity-50"
           [ngClass]="{
@@ -71,6 +72,8 @@ export class InputComponent implements ControlValueAccessor {
   rounded = input<boolean>(false);
   min = input<string>('');
   step = input<string>('');
+
+  focus = output<void>();
 
   isPasswordVisible = signal(false);
   value: string = '';

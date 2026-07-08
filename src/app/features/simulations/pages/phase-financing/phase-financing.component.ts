@@ -13,6 +13,7 @@ import { SegmentedToggleComponent } from '../../../../shared/ui/segmented-toggle
 import { TextareaComponent } from '../../../../shared/ui/textarea/textarea.component';
 import { SimulationStore } from '../../store/simulation.store';
 import { FinancingConfig } from '../../models/financing.model';
+import { shortClientName } from '../../../../core/models/client.model';
 
 @Component({
   selector: 'app-phase-financing',
@@ -277,7 +278,16 @@ export class PhaseFinancingComponent implements OnInit {
     return client ? `${client.firstName} ${client.lastName}` : null;
   }
 
-  get vehicleName(): string | null { return this.simulationStore.selectedVehicle()?.model ?? null; }
+  // Versión corta para el footer (espacio reducido): primer nombre + primer apellido.
+  get footerClientName(): string | null {
+    const client = this.simulationStore.selectedClient();
+    return client ? shortClientName(client) : null;
+  }
+
+  get vehicleName(): string | null {
+    const vehicle = this.simulationStore.selectedVehicle();
+    return vehicle ? `${vehicle.brand} ${vehicle.model}` : null;
+  }
 
   onBack() { this.router.navigate(['/simulations/vehicle']); }
 

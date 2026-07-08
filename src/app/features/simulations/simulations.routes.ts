@@ -25,9 +25,5 @@ export const simulationsRoutes: Routes = [
   {
     path: 'result',
     loadComponent: () => import('./pages/phase-result/phase-result.component').then(m => m.PhaseResultComponent)
-  },
-  {
-    path: 'result/:quotationId',
-    loadComponent: () => import('./pages/phase-result/phase-result.component').then(m => m.PhaseResultComponent)
   }
 ];

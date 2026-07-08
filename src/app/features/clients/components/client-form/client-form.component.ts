@@ -20,6 +20,7 @@ export class ClientFormComponent implements OnInit {
 
   clientForm: FormGroup;
   continue = output<Client>();
+  documentNumberFocus = output<void>();
 
   showValidationError = signal(false);
   showNationality = signal(false); // Señal para controlar la UI
@@ -37,9 +38,9 @@ export class ClientFormComponent implements OnInit {
       phone: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       address: ['', Validators.required],
-      company: [''],
-      monthlyIncome: [null, [Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
-      laborSeniority: [null, [Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]]
+      company: ['', Validators.required],
+      monthlyIncome: [null, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+      laborSeniority: [null, [Validators.required, Validators.min(0), Validators.pattern(/^\d+(\.\d{1,2})?$/)]]
     });
   }
 
@@ -96,5 +97,22 @@ export class ClientFormComponent implements OnInit {
     if (client.documentType) {
       this.onDocumentTypeChange(client.documentType);
     }
+  }
+
+  resetForm() {
+    this.clientForm.reset({
+      documentType: 'DNI',
+      documentNumber: '',
+      nationality: '',
+      firstName: '',
+      lastName: '',
+      phone: '',
+      email: '',
+      address: '',
+      company: '',
+      monthlyIncome: null,
+      laborSeniority: null
+    });
+    this.showValidationError.set(false);
   }
 }

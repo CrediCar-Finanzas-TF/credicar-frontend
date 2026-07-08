@@ -1,15 +1,22 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProgressStepperComponent } from '../../../../shared/components/progress-stepper/progress-stepper.component';
 import { SimulationHeaderComponent } from '../../components/simulation-header/simulation-header.component';
+import { SimulationFooterComponent } from '../../components/simulation-footer/simulation-footer.component';
 import { FinancialSummaryComponent } from '../../components/financial-summary/financial-summary.component';
 import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
-import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { SimulationStore } from '../../store/simulation.store';
 import { QuotationService } from '../../services/quotation.service';
-import { VehicleService } from '../../../vehicles/services/vehicle.service';
-import { CURRENCY_SYMBOL, PaymentScheduleItem } from '../../../../core/models/quotation.model';
+import { shortClientName } from '../../../../core/models/client.model';
+import {
+  buildFinancingSummary,
+  formatGraceType,
+  formatMoney,
+  formatPercent,
+  getFinalBalloonLabel,
+  getRegularInstallmentLabel
+} from '../../../../core/utils/quotation-summary.util';
 
 @Component({
   selector: 'app-phase-result',
@@ -18,23 +25,21 @@ import { CURRENCY_SYMBOL, PaymentScheduleItem } from '../../../../core/models/qu
     CommonModule,
     ProgressStepperComponent,
     SimulationHeaderComponent,
+    SimulationFooterComponent,
     FinancialSummaryComponent,
-    DataTableComponent,
-    ButtonComponent
+    DataTableComponent
   ],
   templateUrl: './phase-result.component.html'
 })
 export class PhaseResultComponent implements OnInit {
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private quotationService = inject(QuotationService);
-  private vehicleService = inject(VehicleService);
   protected simulationStore = inject(SimulationStore);
 
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
 
-  isLoading = signal(false);
-  loadError = signal('');
+  isSaving = signal(false);
+  saveError = signal('');
 
   columns: TableColumn[] = [
     { field: 'quotaNumber', header: '#' },
@@ -54,40 +59,33 @@ export class PhaseResultComponent implements OnInit {
   ];
 
   ngOnInit() {
-    const quotationId = this.route.snapshot.paramMap.get('quotationId');
-
-    if (quotationId) {
-      this.loadHistoricalQuotation(Number(quotationId));
-      return;
-    }
-
+    // Esta fase solo existe dentro del flujo activo de simulación (preview en memoria).
+    // Ver una cotización ya guardada es responsabilidad de /quotations/:id.
     if (!this.simulationStore.quotation()) {
       this.router.navigate(['/simulations/client']);
     }
   }
 
-  // Permite abrir esta pantalla directamente desde /clients (fuera del flujo de simulación),
-  // recargando la cotización guardada en vez de depender del store en memoria.
-  private loadHistoricalQuotation(quotationId: number) {
-    this.isLoading.set(true);
-    this.loadError.set('');
+  onBackToInsurance() {
+    this.router.navigate(['/simulations/insurance']);
+  }
 
-    this.quotationService.getQuotationById(quotationId).subscribe({
+  onSaveQuotation() {
+    const request = this.simulationStore.pendingQuotationRequest();
+    if (!request || this.isSaving()) return;
+
+    this.isSaving.set(true);
+    this.saveError.set('');
+
+    this.quotationService.createQuotation(request).subscribe({
       next: (quotation) => {
+        this.isSaving.set(false);
         this.simulationStore.setQuotation(quotation);
-
-        this.vehicleService.getVehicles().subscribe({
-          next: (vehicles) => {
-            const vehicle = vehicles.find(v => v.id === quotation.vehicleId);
-            if (vehicle) this.simulationStore.setVehicle(vehicle);
-            this.isLoading.set(false);
-          },
-          error: () => this.isLoading.set(false)
-        });
+        this.router.navigate(['/quotations', quotation.id]);
       },
       error: () => {
-        this.isLoading.set(false);
-        this.loadError.set('No se pudo cargar la cotización solicitada.');
+        this.isSaving.set(false);
+        this.saveError.set('No se pudo guardar la cotización. Inténtalo de nuevo.');
       }
     });
   }
@@ -101,36 +99,30 @@ export class PhaseResultComponent implements OnInit {
     return quotation ? `Cliente #${quotation.clientId}` : null;
   }
 
+  get footerClientName(): string | null {
+    const client = this.simulationStore.selectedClient();
+    return client ? shortClientName(client) : this.clientName;
+  }
+
   get vehicleName(): string | null {
     const quotation = this.simulationStore.quotation();
     const vehicle = this.simulationStore.selectedVehicle();
     if (vehicle && quotation && vehicle.id === quotation.vehicleId) {
-      return vehicle.model;
+      return `${vehicle.brand} ${vehicle.model}`;
     }
     return quotation ? `Vehículo #${quotation.vehicleId}` : null;
   }
 
   formatMoney(value: number, currency: string): string {
-    const symbol = CURRENCY_SYMBOL[currency] ?? currency;
-    return `${symbol} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return formatMoney(value, currency);
   }
 
   formatGraceType(graceType: string): string {
-    switch (graceType) {
-      case 'TOTAL': return 'Total';
-      case 'PARTIAL': return 'Parcial';
-      default: return 'Sin gracia';
-    }
+    return formatGraceType(graceType);
   }
 
-  private formatPercent(value: number): string {
-    return `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
-  }
-
-  // Se deriva íntegramente de la cotización (funciona tanto recién generada como cargada del historial).
   get financing() {
     const q = this.simulationStore.quotation();
-
     if (!q) {
       return {
         totalPrice: 'S/ 0', downPayment: 'S/ 0', downPaymentPercent: '0%',
@@ -138,66 +130,36 @@ export class PhaseResultComponent implements OnInit {
         notaryFee: 'S/ 0', registryFee: 'S/ 0'
       };
     }
-
-    const vehiclePrice = q.financingAmount + q.initialFee;
-    const downPaymentPercent = vehiclePrice > 0 ? (q.initialFee / vehiclePrice) * 100 : 0;
-    // Notaría/registro ya no están dentro de financingAmount, así que se suman aparte para el precio total real.
-    const totalOperation = vehiclePrice + q.notaryFee + q.registryFee;
-
-    return {
-      totalPrice: this.formatMoney(totalOperation, q.currency),
-      downPayment: this.formatMoney(q.initialFee, q.currency),
-      downPaymentPercent: `${downPaymentPercent.toFixed(0)}%`,
-      financedAmount: this.formatMoney(q.financingAmount, q.currency),
-      term: `${q.totalQuotas} meses`,
-      rateTypeLabel: q.interestRateType === 'NOMINAL' ? 'TNA' : 'TEA',
-      rateValue: q.interestRateType === 'NOMINAL'
-        ? `${q.interestRatePercentage}% (Cap. ${q.capitalization})`
-        : `${q.interestRatePercentage}%`,
-      notaryFee: this.formatMoney(q.notaryFee, q.currency),
-      registryFee: this.formatMoney(q.registryFee, q.currency)
-    };
+    return buildFinancingSummary(q);
   }
 
   get cokPercentLabel(): string {
     const q = this.simulationStore.quotation();
-    return q ? this.formatPercent(q.cokPercentage) : '0.00%';
+    return q ? formatPercent(q.cokPercentage) : '0.00%';
   }
 
   get vanLabel(): string {
     const q = this.simulationStore.quotation();
-    return q ? this.formatMoney(q.van, q.currency) : 'S/ 0.00';
+    return q ? formatMoney(q.van, q.currency) : 'S/ 0.00';
   }
 
   get tirLabel(): string {
     const q = this.simulationStore.quotation();
-    return q ? this.formatPercent(q.tir) : '0.00%';
+    return q ? formatPercent(q.tir) : '0.00%';
   }
 
   get tceaLabel(): string {
     const q = this.simulationStore.quotation();
-    return q ? this.formatPercent(q.tcea) : '0.00%';
+    return q ? formatPercent(q.tcea) : '0.00%';
   }
 
   get regularInstallmentLabel(): string {
     const q = this.simulationStore.quotation();
-    if (!q || q.schedule.length === 0) return 'S/ 0.00';
-    // Se excluyen cuotas con additionalExpenses (ej. cuota 1 con notaría/registro) para
-    // no mostrar un cargo único como si fuera la cuota "regular" del crédito.
-    const regular = q.schedule.find((item: PaymentScheduleItem) => item.graceType === 'NONE' && item.additionalExpenses === 0)
-      ?? q.schedule.find((item: PaymentScheduleItem) => item.graceType === 'NONE')
-      ?? q.schedule[q.schedule.length - 1];
-    return this.formatMoney(regular.monthlyQuota, regular.currency);
+    return q ? getRegularInstallmentLabel(q) : 'S/ 0.00';
   }
 
   get finalBalloonLabel(): string {
     const q = this.simulationStore.quotation();
-    if (!q || q.modality !== 'SMART' || q.schedule.length === 0) return '0';
-    const last = q.schedule[q.schedule.length - 1];
-    return this.formatMoney(last.monthlyQuota, last.currency);
-  }
-
-  onNewSimulation() {
-    this.router.navigate(['/simulations/client']);
+    return q ? getFinalBalloonLabel(q) : '0';
   }
 }

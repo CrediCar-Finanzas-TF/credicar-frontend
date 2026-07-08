@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Client, ClientRequest, ClientResponse } from '../../../core/models/client.model';
+import { Client, ClientRequest, ClientResponse, UpdateClientRequest } from '../../../core/models/client.model';
 import { PageResponse } from '../../../core/models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
@@ -30,6 +30,12 @@ export class ClientService {
     );
   }
 
+  getClientById(id: string): Observable<Client> {
+    return this.http.get<ClientResponse>(`${this.baseUrl}/${id}`).pipe(
+      map(response => this.toClient(response))
+    );
+  }
+
   createClient(client: Client): Observable<Client> {
     return this.http.post<ClientResponse>(this.baseUrl, this.toRequest(client)).pipe(
       map(response => this.toClient(response))
@@ -37,15 +43,26 @@ export class ClientService {
   }
 
   updateClient(id: string, client: Client): Observable<Client> {
-    return this.http.put<ClientResponse>(`${this.baseUrl}/${id}`, this.toRequest(client)).pipe(
+    return this.http.put<ClientResponse>(`${this.baseUrl}/${id}`, this.toUpdateRequest(client)).pipe(
       map(response => this.toClient(response))
     );
+  }
+
+  deleteClient(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
   private toRequest(client: Client): ClientRequest {
     return {
       documentType: client.documentType,
       documentNumber: client.documentNumber,
+      ...this.toUpdateRequest(client)
+    };
+  }
+
+  // El documento no se puede modificar vía PUT (UpdateClientResource del backend no lo acepta).
+  private toUpdateRequest(client: Client): UpdateClientRequest {
+    return {
       firstName: client.firstName,
       lastName: client.lastName,
       phone: client.phone,

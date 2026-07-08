@@ -14,22 +14,19 @@
     ></app-client-list>
 
     <div class="flex flex-col gap-3">
-      <app-client-form (continue)="onClientFormContinue($event)"></app-client-form>
-
-      @if (errorMessage()) {
-        <p class="text-sm text-danger">{{ errorMessage() }}</p>
-      }
+      <app-client-form
+        (continue)="onClientFormContinue($event)"
+        (documentNumberFocus)="onDocumentNumberFocus()"
+      ></app-client-form>
     </div>
   </div>
 
 </div>
 
 <app-simulation-footer
-  [clientName]="selectedClient() ? (selectedClient()!.firstName + ' ' + selectedClient()!.lastName) : null"
+  [clientName]="clientName"
   [vehicleName]="null"
   [basePrice]="null"
   [showBackButton]="false"
-  [continueDisabled]="isSaving()"
-  [continueLabel]="isSaving() ? 'Guardando...' : 'Continuar'"
   (continue)="onFooterContinue()"
 ></app-simulation-footer>

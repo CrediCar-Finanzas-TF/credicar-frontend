@@ -9,6 +9,7 @@ import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { SelectComponent } from '../../../../shared/ui/select/select.component';
 import { VehicleCardComponent } from '../../../vehicles/components/vehicle-card/vehicle-card.component';
 import { Vehicle } from '../../../../core/models/vehicle.model';
+import { shortClientName } from '../../../../core/models/client.model';
 import { SimulationStore } from '../../store/simulation.store';
 import { VehicleService } from '../../../vehicles/services/vehicle.service';
 
@@ -56,7 +57,12 @@ export class PhaseVehicleComponent implements OnInit {
 
   get clientName(): string | null {
     const client = this.simulationStore.selectedClient();
-    return client ? `${client.firstName} ${client.lastName}` : null;
+    return client ? shortClientName(client) : null;
+  }
+
+  get vehicleName(): string | null {
+    const vehicle = this.simulationStore.selectedVehicle();
+    return vehicle ? `${vehicle.brand} ${vehicle.model}` : null;
   }
 
   selectVehicle(vehicle: Vehicle) {

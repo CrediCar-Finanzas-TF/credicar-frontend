@@ -43,7 +43,7 @@
 
 <app-simulation-footer
   [clientName]="clientName"
-  [vehicleName]="simulationStore.selectedVehicle()?.model ?? null"
+  [vehicleName]="vehicleName"
   [basePrice]="simulationStore.selectedVehicle()?.price ?? null"
   (back)="onBack()"
   (continue)="onFooterContinue()"

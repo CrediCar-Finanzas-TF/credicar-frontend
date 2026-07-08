@@ -11,7 +11,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <app-input label="Número de documento" formControlName="documentNumber"></app-input>
+      <app-input label="Número de documento" formControlName="documentNumber" (focus)="documentNumberFocus.emit()"></app-input>
 
       @if (showNationality()) {
         <app-input label="Nacionalidad" formControlName="nationality"></app-input>

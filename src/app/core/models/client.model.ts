@@ -27,6 +27,17 @@ export interface ClientRequest {
   seniorityYears: number;
 }
 
+// Refleja UpdateClientResource del backend: el documento no se puede modificar vía PUT.
+export type UpdateClientRequest = Omit<ClientRequest, 'documentType' | 'documentNumber'>;
+
+// Para mostrar en espacios reducidos (ej. footer de simulación): solo el primer nombre
+// y el primer apellido, incluso si el cliente tiene nombres/apellidos compuestos.
+export function shortClientName(client: Pick<Client, 'firstName' | 'lastName'>): string {
+  const firstName = client.firstName.trim().split(/\s+/)[0] ?? '';
+  const lastName = client.lastName.trim().split(/\s+/)[0] ?? '';
+  return `${firstName} ${lastName}`.trim();
+}
+
 export interface ClientResponse extends ClientRequest {
   id: number;
 }

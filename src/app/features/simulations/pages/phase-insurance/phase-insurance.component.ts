@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { of, switchMap } from 'rxjs';
 import { ProgressStepperComponent } from '../../../../shared/components/progress-stepper/progress-stepper.component';
 import { SimulationHeaderComponent } from '../../components/simulation-header/simulation-header.component';
 import { SimulationFooterComponent } from '../../components/simulation-footer/simulation-footer.component';
@@ -10,6 +11,8 @@ import { InsuranceCoverageCardComponent } from '../../components/insurance-cover
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { SimulationStore } from '../../store/simulation.store';
 import { QuotationService } from '../../services/quotation.service';
+import { ClientService } from '../../../clients/services/client.service';
+import { Client, shortClientName } from '../../../../core/models/client.model';
 import {
   CAPITALIZATION_MAP,
   CURRENCY_MAP,
@@ -46,6 +49,7 @@ export class PhaseInsuranceComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private quotationService = inject(QuotationService);
+  private clientService = inject(ClientService);
   protected simulationStore = inject(SimulationStore);
 
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
@@ -87,8 +91,15 @@ export class PhaseInsuranceComponent {
     return client ? `${client.firstName} ${client.lastName}` : null;
   }
 
+  // Versión corta para el footer (espacio reducido): primer nombre + primer apellido.
+  get footerClientName(): string | null {
+    const client = this.simulationStore.selectedClient();
+    return client ? shortClientName(client) : null;
+  }
+
   get vehicleName(): string | null {
-    return this.simulationStore.selectedVehicle()?.model ?? null;
+    const vehicle = this.simulationStore.selectedVehicle();
+    return vehicle ? `${vehicle.brand} ${vehicle.model}` : null;
   }
 
   private get symbol(): string {
@@ -214,7 +225,7 @@ export class PhaseInsuranceComponent {
     const client = this.simulationStore.selectedClient();
     const vehicle = this.simulationStore.selectedVehicle();
 
-    if (!config || !client?.id || !vehicle?.id) {
+    if (!config || !client || !vehicle?.id) {
       this.errorMessage.set('Falta información del cliente, vehículo o financiamiento. Vuelve a las fases anteriores.');
       return;
     }
@@ -222,39 +233,50 @@ export class PhaseInsuranceComponent {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
 
-    const request: QuotationRequest = {
-      clientId: Number(client.id),
-      vehicleId: vehicle.id,
-      financingAmount: config.financedAmount,
-      initialFee: config.downPaymentAmount,
-      currency: CURRENCY_MAP[config.currency] ?? 'PEN',
-      totalQuotas: config.totalQuotas,
-      modality: MODALITY_MAP[config.modality] ?? 'TRADITIONAL',
-      interestRateType: RATE_TYPE_MAP[config.rateType] ?? 'EFFECTIVE',
-      interestRatePercentage: config.rateValue,
-      capitalization: CAPITALIZATION_MAP[config.capitalization] ?? 'MONTHLY',
-      gracePeriodType: GRACE_TYPE_MAP[config.gracePeriodType] ?? 'PARTIAL',
-      gracePeriodMonths: config.gracePeriodMonths,
-      desgravamenRate: Number(this.insuranceForm.value.desgravamenRate) || 0,
-      vehicularInsuranceMonthly: Number(this.insuranceForm.value.vehicularInsuranceMonthly) || 0,
-      roadsideAssistanceMonthly: this.coverageCost('roadsideAssistance'),
-      extendedWarrantyMonthly: this.coverageCost('extendedWarranty'),
-      unemploymentInsuranceMonthly: this.coverageCost('unemploymentInsurance'),
-      // Notaría/registro no se financian: se cobran aparte como gasto inicial en la cuota 1
-      // (additionalExpenses), sin generar interés y sin inflar el capital financiado.
-      additionalExpenses: config.notaryFee + config.registryFee,
-      // El backend aplica este % sobre financingAmount, pero la cuota balón se define como % del
-      // PRECIO DEL VEHÍCULO (convención estándar de "Compra Inteligente"). Se ajusta la fracción
-      // para que el monto resultante (financingAmount * fracción) sea igual a vehiclePrice * balloonPercent.
-      balloonPaymentPercentage: config.modality === 'Compra inteligente'
-        ? (config.vehiclePrice * (config.balloonPercent / 100)) / config.financedAmount
-        : 0,
-      cokPercentage: config.cok,
-      notaryFee: config.notaryFee,
-      registryFee: config.registryFee
-    };
+    // El cliente recién escrito (sin id) todavía no existe en la BD: se registra recién
+    // al generar la cotización, no al continuar desde la fase 1.
+    const ensureClient$ = client.id ? of(client) : this.clientService.createClient(client);
 
-    this.quotationService.createQuotation(request).subscribe({
+    ensureClient$.pipe(
+      switchMap((resolvedClient: Client) => {
+        this.simulationStore.setClient(resolvedClient);
+
+        const request: QuotationRequest = {
+          clientId: Number(resolvedClient.id),
+          vehicleId: vehicle.id!,
+          financingAmount: config.financedAmount,
+          initialFee: config.downPaymentAmount,
+          currency: CURRENCY_MAP[config.currency] ?? 'PEN',
+          totalQuotas: config.totalQuotas,
+          modality: MODALITY_MAP[config.modality] ?? 'TRADITIONAL',
+          interestRateType: RATE_TYPE_MAP[config.rateType] ?? 'EFFECTIVE',
+          interestRatePercentage: config.rateValue,
+          capitalization: CAPITALIZATION_MAP[config.capitalization] ?? 'MONTHLY',
+          gracePeriodType: GRACE_TYPE_MAP[config.gracePeriodType] ?? 'PARTIAL',
+          gracePeriodMonths: config.gracePeriodMonths,
+          desgravamenRate: Number(this.insuranceForm.value.desgravamenRate) || 0,
+          vehicularInsuranceMonthly: Number(this.insuranceForm.value.vehicularInsuranceMonthly) || 0,
+          roadsideAssistanceMonthly: this.coverageCost('roadsideAssistance'),
+          extendedWarrantyMonthly: this.coverageCost('extendedWarranty'),
+          unemploymentInsuranceMonthly: this.coverageCost('unemploymentInsurance'),
+          // Notaría/registro no se financian: se cobran aparte como gasto inicial en la cuota 1
+          // (additionalExpenses), sin generar interés y sin inflar el capital financiado.
+          additionalExpenses: config.notaryFee + config.registryFee,
+          // El backend aplica este % sobre financingAmount, pero la cuota balón se define como % del
+          // PRECIO DEL VEHÍCULO (convención estándar de "Compra Inteligente"). Se ajusta la fracción
+          // para que el monto resultante (financingAmount * fracción) sea igual a vehiclePrice * balloonPercent.
+          balloonPaymentPercentage: config.modality === 'Compra inteligente'
+            ? (config.vehiclePrice * (config.balloonPercent / 100)) / config.financedAmount
+            : 0,
+          cokPercentage: config.cok,
+          notaryFee: config.notaryFee,
+          registryFee: config.registryFee
+        };
+
+        this.simulationStore.setPendingQuotationRequest(request);
+        return this.quotationService.previewQuotation(request);
+      })
+    ).subscribe({
       next: (quotation) => {
         this.isSubmitting.set(false);
         this.simulationStore.setQuotation(quotation);
@@ -262,7 +284,7 @@ export class PhaseInsuranceComponent {
       },
       error: () => {
         this.isSubmitting.set(false);
-        this.errorMessage.set('No se pudo generar la cotización. Verifica los datos e inténtalo de nuevo.');
+        this.errorMessage.set('No se pudo registrar el cliente o calcular la cotización. Verifica los datos e inténtalo de nuevo.');
       }
     });
   }

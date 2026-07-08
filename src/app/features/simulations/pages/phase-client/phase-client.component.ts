@@ -6,9 +6,8 @@ import { SimulationHeaderComponent } from '../../components/simulation-header/si
 import { SimulationFooterComponent } from '../../components/simulation-footer/simulation-footer.component';
 import { ClientListComponent } from '../../../clients/components/client-list/client-list.component';
 import { ClientFormComponent } from '../../../clients/components/client-form/client-form.component';
-import { Client } from '../../../../core/models/client.model';
+import { Client, shortClientName } from '../../../../core/models/client.model';
 import { SimulationStore } from '../../store/simulation.store';
-import { ClientService } from '../../../clients/services/client.service';
 
 @Component({
   selector: 'app-phase-client',
@@ -29,13 +28,10 @@ export class PhaseClientComponent implements OnInit {
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
 
   selectedClient = signal<Client | null>(null);
-  isSaving = signal(false);
-  errorMessage = signal('');
 
   constructor(
     private router: Router,
-    private simulationStore: SimulationStore,
-    private clientService: ClientService
+    private simulationStore: SimulationStore
   ) {}
 
   ngOnInit() {
@@ -47,22 +43,24 @@ export class PhaseClientComponent implements OnInit {
 
   selectExistingClient(client: Client) {
     this.selectedClient.set(client);
+    this.clientFormComponent.resetForm();
   }
 
-  onClientFormContinue(client: Client) {
-    this.isSaving.set(true);
-    this.errorMessage.set('');
+  // Si el usuario empieza a escribir un cliente nuevo, se descarta la selección de la lista
+  // para que "Continuar" tome los datos escritos y no el cliente elegido previamente.
+  onDocumentNumberFocus() {
+    this.selectedClient.set(null);
+  }
 
-    this.clientService.createClient(client).subscribe({
-      next: (createdClient) => {
-        this.isSaving.set(false);
-        this.proceedToVehiclePhase(createdClient);
-      },
-      error: () => {
-        this.isSaving.set(false);
-        this.errorMessage.set('No se pudo registrar el cliente. Verifica los datos e inténtalo de nuevo.');
-      }
-    });
+  get clientName(): string | null {
+    const client = this.selectedClient();
+    return client ? shortClientName(client) : null;
+  }
+
+  // El cliente escrito recién se registra en la BD al generar la cotización (fase Seguro),
+  // no aquí: por ahora solo viaja como borrador dentro del store de la simulación.
+  onClientFormContinue(client: Client) {
+    this.proceedToVehiclePhase(client);
   }
 
   onFooterContinue() {

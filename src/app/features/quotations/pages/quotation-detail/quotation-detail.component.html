@@ -1,22 +1,28 @@
-<div class="flex flex-col gap-8 animate-fade-in w-full max-w-6xl mx-auto pb-24">
+<div class="flex flex-col gap-6 animate-fade-in w-full max-w-7xl mx-auto">
 
-  <app-progress-stepper [steps]="steps" [currentStep]="4"></app-progress-stepper>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-text-primary">Cronograma de pagos</h1>
+      <p class="text-sm text-text-secondary">{{ clientName }} — {{ vehicleName }}</p>
+    </div>
 
-  <app-simulation-header
-    title="Resultado de la cotización"
-    subtitle="Cronograma de pagos e indicadores financieros generados por la entidad"
-  ></app-simulation-header>
+    <app-button variant="outline" (click)="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>Volver a Cotizaciones</span>
+    </app-button>
+  </div>
 
-  @if (saveError()) {
-    <p class="text-sm text-danger">{{ saveError() }}</p>
+  @if (loadError()) {
+    <p class="text-sm text-danger">{{ loadError() }}</p>
   }
 
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
     <div class="flex flex-col gap-6 min-w-0">
       <app-data-table
+        [isLoading]="isLoading()"
         [columns]="columns"
-        [data]="simulationStore.quotation()?.schedule ?? []"
+        [data]="quotation()?.schedule ?? []"
         [showPagination]="false"
         [rowsLimit]="200"
         minWidth="min-w-[1500px]"
@@ -69,8 +75,8 @@
     </div>
 
     <app-financial-summary
-      [clientName]="clientName ?? 'Ninguno'"
-      [vehicleName]="vehicleName ?? 'Ninguno'"
+      [clientName]="clientName"
+      [vehicleName]="vehicleName"
       [totalPrice]="financing.totalPrice"
       [downPayment]="financing.downPayment"
       [downPaymentPercent]="financing.downPaymentPercent"
@@ -92,13 +98,3 @@
   </div>
 
 </div>
-
-<app-simulation-footer
-  [clientName]="footerClientName"
-  [vehicleName]="vehicleName"
-  [showBasePrice]="false"
-  [continueDisabled]="isSaving()"
-  [continueLabel]="isSaving() ? 'Guardando...' : 'Guardar cotización'"
-  (back)="onBackToInsurance()"
-  (continue)="onSaveQuotation()"
-></app-simulation-footer>

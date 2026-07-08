@@ -1,0 +1,77 @@
+<div class="flex flex-col gap-8 animate-fade-in w-full max-w-7xl mx-auto">
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+    <app-metric-card title="Cotizaciones Totales" [value]="quotationsTotalCount">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+    </app-metric-card>
+
+    <app-metric-card title="Clientes Cotizados" [value]="clientsQuotedCount">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>
+    </app-metric-card>
+
+    <app-metric-card title="Monto Total Financiado" [value]="totalFinancedLabel">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+    </app-metric-card>
+
+    <app-metric-card title="Monto Promedio Financiado" [value]="averageFinancedLabel">
+      <svg icon xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    </app-metric-card>
+
+  </div>
+
+  <div class="flex flex-col gap-6">
+
+    <div class="w-full md:w-96">
+      <app-input
+        placeholder="Buscar por cliente o vehículo..."
+        [hasLeftIcon]="true"
+        [(ngModel)]="searchQuery"
+      >
+        <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </app-input>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="text-sm text-danger">{{ errorMessage() }}</p>
+    }
+
+    <app-data-table
+      [columns]="cols"
+      [data]="filteredRows"
+      [totalItems]="quotationsTotalCount"
+      itemName="cotizaciones"
+      [isLoading]="isLoading()"
+      [showPagination]="false"
+      [rowsLimit]="200"
+    >
+      <ng-template #bodyTpl let-row let-col="col">
+
+        @if (col.field === 'client') {
+          <div class="flex items-center gap-3">
+            <app-chip [initials]="row.initials"></app-chip>
+            <span class="text-sm font-medium text-text-primary">{{ row.clientName }}</span>
+          </div>
+        }
+
+        @else if (col.field === 'actions') {
+          <div class="flex items-center justify-end gap-1">
+            <button
+              type="button"
+              (click)="viewSchedule(row)"
+              class="text-text-muted hover:text-text-primary transition-colors focus:outline-none p-1.5 cursor-pointer"
+              title="Ver cronograma"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            </button>
+          </div>
+        }
+
+        @else {
+          <span class="text-sm text-text-secondary">{{ row[col.field] }}</span>
+        }
+
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

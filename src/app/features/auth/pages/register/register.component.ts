@@ -1,19 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { CheckboxComponent } from '../../../../shared/ui/checkbox/checkbox.component';
+import {LogoComponent} from '../../../../shared/ui/logo/logo.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent, CheckboxComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, InputComponent, ButtonComponent, CheckboxComponent, LogoComponent],
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   registerForm: FormGroup;
+  isLoading = signal(false);
+  errorMessage = signal('');
 
   constructor(private fb: FormBuilder) {
     this.registerForm = this.fb.group({
@@ -31,8 +38,23 @@ export class RegisterComponent {
   }
 
   onSubmit() {
-    if (this.registerForm.valid) {
-      console.log('Datos de registro:', this.registerForm.value);
+    if (this.registerForm.invalid) {
+      return;
     }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const { fullName, email, password } = this.registerForm.value;
+    this.authService.signUp({ fullName, email, password }).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.errorMessage.set('No se pudo crear la cuenta. Verifica los datos e inténtalo de nuevo.');
+      }
+    });
   }
 }

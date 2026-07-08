@@ -1,0 +1,98 @@
+<div class="flex flex-col gap-8 animate-fade-in w-full max-w-6xl mx-auto pb-24">
+
+  <app-progress-stepper [steps]="steps" [currentStep]="4"></app-progress-stepper>
+
+  <app-simulation-header
+    title="Resultado de la cotización"
+    subtitle="Cronograma de pagos e indicadores financieros generados por la entidad"
+  ></app-simulation-header>
+
+  @if (loadError()) {
+    <p class="text-sm text-danger">{{ loadError() }}</p>
+  }
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+
+    <div class="flex flex-col gap-6">
+      <app-data-table
+        [isLoading]="isLoading()"
+        [columns]="columns"
+        [data]="simulationStore.quotation()?.schedule ?? []"
+        [showPagination]="false"
+        [rowsLimit]="200"
+        minWidth="min-w-[1500px]"
+      >
+        <ng-template #bodyTpl let-row let-col="col">
+          @switch (col.field) {
+            @case ('graceType') {
+              <span class="text-sm text-text-secondary">{{ formatGraceType(row.graceType) }}</span>
+            }
+            @case ('initialBalance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.initialBalance, row.currency) }}</span>
+            }
+            @case ('interest') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.interest, row.currency) }}</span>
+            }
+            @case ('amortization') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.amortization, row.currency) }}</span>
+            }
+            @case ('desgravamenInsurance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.desgravamenInsurance, row.currency) }}</span>
+            }
+            @case ('vehicularInsurance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.vehicularInsurance, row.currency) }}</span>
+            }
+            @case ('roadsideAssistance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.roadsideAssistance, row.currency) }}</span>
+            }
+            @case ('extendedWarranty') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.extendedWarranty, row.currency) }}</span>
+            }
+            @case ('unemploymentInsurance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.unemploymentInsurance, row.currency) }}</span>
+            }
+            @case ('additionalExpenses') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.additionalExpenses, row.currency) }}</span>
+            }
+            @case ('monthlyQuota') {
+              <span class="text-sm font-semibold text-text-primary">{{ formatMoney(row.monthlyQuota, row.currency) }}</span>
+            }
+            @case ('finalBalance') {
+              <span class="text-sm text-text-secondary">{{ formatMoney(row.finalBalance, row.currency) }}</span>
+            }
+            @default {
+              <span class="text-sm text-text-secondary">{{ row[col.field] }}</span>
+            }
+          }
+        </ng-template>
+      </app-data-table>
+
+      <app-button variant="outline" [fullWidth]="true" (click)="onNewSimulation()">
+        Nueva simulación
+      </app-button>
+    </div>
+
+    <app-financial-summary
+      [clientName]="clientName ?? 'Ninguno'"
+      [vehicleName]="vehicleName ?? 'Ninguno'"
+      [totalPrice]="financing.totalPrice"
+      [downPayment]="financing.downPayment"
+      [downPaymentPercent]="financing.downPaymentPercent"
+      [financedAmount]="financing.financedAmount"
+      [term]="financing.term"
+      [rateTypeLabel]="financing.rateTypeLabel"
+      [rateValue]="financing.rateValue"
+      [balloonAmount]="finalBalloonLabel"
+      [notaryFee]="financing.notaryFee"
+      [registryFee]="financing.registryFee"
+      [showIndicators]="true"
+      [cokPercent]="cokPercentLabel"
+      [van]="vanLabel"
+      [tir]="tirLabel"
+      [tcea]="tceaLabel"
+      [estimatedInstallment]="regularInstallmentLabel"
+    ></app-financial-summary>
+
+  </div>
+
+</div>

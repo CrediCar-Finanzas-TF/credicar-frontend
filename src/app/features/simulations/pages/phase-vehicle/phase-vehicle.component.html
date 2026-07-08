@@ -1,0 +1,50 @@
+<div class="flex flex-col gap-8 animate-fade-in w-full max-w-6xl mx-auto pb-24">
+
+  <app-progress-stepper [steps]="steps" [currentStep]="1"></app-progress-stepper>
+
+  <app-simulation-header
+    title="Selecciona un vehículo"
+    subtitle="Explora el catálogo disponible o busca un modelo específico para cotizar"
+  ></app-simulation-header>
+
+  <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+    <div class="w-full lg:w-96">
+      <app-input
+        placeholder="Buscar por marca, modelo o versión..."
+        [hasLeftIcon]="true"
+        [(ngModel)]="searchQuery"
+      >
+        <svg left-icon xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </app-input>
+    </div>
+
+    <div class="flex gap-4 w-full lg:w-auto">
+      <app-select placeholder="Marca" [options]="brandOptions"></app-select>
+      <app-select placeholder="Modelo" [options]="modelOptions"></app-select>
+      <app-select placeholder="Año" [options]="yearOptions"></app-select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @if (isLoading()) {
+      <p class="text-sm text-text-muted">Cargando vehículos...</p>
+    } @else {
+      @for (vehicle of vehicles(); track vehicle.id_vehiculo) {
+        <app-vehicle-card
+          [vehicle]="vehicle"
+          [selectable]="true"
+          (onSelect)="selectVehicle($event)"
+        ></app-vehicle-card>
+      }
+    }
+  </div>
+
+</div>
+
+<app-simulation-footer
+  [clientName]="clientName"
+  [vehicleName]="simulationStore.selectedVehicle()?.model ?? null"
+  [basePrice]="simulationStore.selectedVehicle()?.price ?? null"
+  (back)="onBack()"
+  (continue)="onFooterContinue()"
+></app-simulation-footer>

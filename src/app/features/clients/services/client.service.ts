@@ -31,7 +31,19 @@ export class ClientService {
   }
 
   createClient(client: Client): Observable<Client> {
-    const request: ClientRequest = {
+    return this.http.post<ClientResponse>(this.baseUrl, this.toRequest(client)).pipe(
+      map(response => this.toClient(response))
+    );
+  }
+
+  updateClient(id: string, client: Client): Observable<Client> {
+    return this.http.put<ClientResponse>(`${this.baseUrl}/${id}`, this.toRequest(client)).pipe(
+      map(response => this.toClient(response))
+    );
+  }
+
+  private toRequest(client: Client): ClientRequest {
+    return {
       documentType: client.documentType,
       documentNumber: client.documentNumber,
       firstName: client.firstName,
@@ -43,10 +55,6 @@ export class ClientService {
       monthlyIncome: client.monthlyIncome ?? 0,
       seniorityYears: client.laborSeniority ?? 0
     };
-
-    return this.http.post<ClientResponse>(this.baseUrl, request).pipe(
-      map(response => this.toClient(response))
-    );
   }
 
   private toClient(response: ClientResponse): Client {

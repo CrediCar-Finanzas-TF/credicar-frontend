@@ -7,10 +7,15 @@
     subtitle="Cronograma de pagos e indicadores financieros generados por la entidad"
   ></app-simulation-header>
 
+  @if (loadError()) {
+    <p class="text-sm text-danger">{{ loadError() }}</p>
+  }
+
   <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
     <div class="flex flex-col gap-6">
       <app-data-table
+        [isLoading]="isLoading()"
         [columns]="columns"
         [data]="simulationStore.quotation()?.schedule ?? []"
         [showPagination]="false"
@@ -81,7 +86,7 @@
       [notaryFee]="financing.notaryFee"
       [registryFee]="financing.registryFee"
       [showIndicators]="true"
-      [cokPercent]="financing.cokPercent"
+      [cokPercent]="cokPercentLabel"
       [van]="vanLabel"
       [tir]="tirLabel"
       [tcea]="tceaLabel"

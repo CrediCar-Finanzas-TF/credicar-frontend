@@ -1,12 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProgressStepperComponent } from '../../../../shared/components/progress-stepper/progress-stepper.component';
 import { SimulationHeaderComponent } from '../../components/simulation-header/simulation-header.component';
 import { FinancialSummaryComponent } from '../../components/financial-summary/financial-summary.component';
 import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { SimulationStore } from '../../store/simulation.store';
+import { QuotationService } from '../../services/quotation.service';
+import { VehicleService } from '../../../vehicles/services/vehicle.service';
 import { CURRENCY_SYMBOL, PaymentScheduleItem } from '../../../../core/models/quotation.model';
 
 @Component({
@@ -24,9 +26,15 @@ import { CURRENCY_SYMBOL, PaymentScheduleItem } from '../../../../core/models/qu
 })
 export class PhaseResultComponent implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private quotationService = inject(QuotationService);
+  private vehicleService = inject(VehicleService);
   protected simulationStore = inject(SimulationStore);
 
   steps = ['Cliente', 'Vehículo', 'Financiamiento', 'Seguro', 'Resultado'];
+
+  isLoading = signal(false);
+  loadError = signal('');
 
   columns: TableColumn[] = [
     { field: 'quotaNumber', header: '#' },
@@ -46,18 +54,60 @@ export class PhaseResultComponent implements OnInit {
   ];
 
   ngOnInit() {
+    const quotationId = this.route.snapshot.paramMap.get('quotationId');
+
+    if (quotationId) {
+      this.loadHistoricalQuotation(Number(quotationId));
+      return;
+    }
+
     if (!this.simulationStore.quotation()) {
       this.router.navigate(['/simulations/client']);
     }
   }
 
+  // Permite abrir esta pantalla directamente desde /clients (fuera del flujo de simulación),
+  // recargando la cotización guardada en vez de depender del store en memoria.
+  private loadHistoricalQuotation(quotationId: number) {
+    this.isLoading.set(true);
+    this.loadError.set('');
+
+    this.quotationService.getQuotationById(quotationId).subscribe({
+      next: (quotation) => {
+        this.simulationStore.setQuotation(quotation);
+
+        this.vehicleService.getVehicles().subscribe({
+          next: (vehicles) => {
+            const vehicle = vehicles.find(v => v.id === quotation.vehicleId);
+            if (vehicle) this.simulationStore.setVehicle(vehicle);
+            this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false)
+        });
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.loadError.set('No se pudo cargar la cotización solicitada.');
+      }
+    });
+  }
+
   get clientName(): string | null {
+    const quotation = this.simulationStore.quotation();
     const client = this.simulationStore.selectedClient();
-    return client ? `${client.firstName} ${client.lastName}` : null;
+    if (client && quotation && Number(client.id) === quotation.clientId) {
+      return `${client.firstName} ${client.lastName}`;
+    }
+    return quotation ? `Cliente #${quotation.clientId}` : null;
   }
 
   get vehicleName(): string | null {
-    return this.simulationStore.selectedVehicle()?.model ?? null;
+    const quotation = this.simulationStore.quotation();
+    const vehicle = this.simulationStore.selectedVehicle();
+    if (vehicle && quotation && vehicle.id === quotation.vehicleId) {
+      return vehicle.model;
+    }
+    return quotation ? `Vehículo #${quotation.vehicleId}` : null;
   }
 
   formatMoney(value: number, currency: string): string {
@@ -77,28 +127,39 @@ export class PhaseResultComponent implements OnInit {
     return `${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
   }
 
+  // Se deriva íntegramente de la cotización (funciona tanto recién generada como cargada del historial).
   get financing() {
-    const config = this.simulationStore.financingConfig();
+    const q = this.simulationStore.quotation();
+
+    if (!q) {
+      return {
+        totalPrice: 'S/ 0', downPayment: 'S/ 0', downPaymentPercent: '0%',
+        financedAmount: 'S/ 0', term: '-', rateTypeLabel: 'TEA', rateValue: '0%',
+        notaryFee: 'S/ 0', registryFee: 'S/ 0'
+      };
+    }
+
+    const totalOperation = q.financingAmount + q.initialFee;
+    const downPaymentPercent = totalOperation > 0 ? (q.initialFee / totalOperation) * 100 : 0;
+
     return {
-      totalPrice: config ? this.formatMoney(config.vehiclePrice, this.quotationCurrency) : 'S/ 0',
-      downPayment: config ? this.formatMoney(config.downPaymentAmount, this.quotationCurrency) : 'S/ 0',
-      downPaymentPercent: config ? `${config.downPaymentPercent}%` : '0%',
-      financedAmount: this.simulationStore.quotation()
-        ? this.formatMoney(this.simulationStore.quotation()!.financingAmount, this.quotationCurrency)
-        : 'S/ 0',
-      term: config ? `${config.totalQuotas} meses` : '-',
-      rateTypeLabel: config?.rateType === 'Nominal' ? 'TNA' : 'TEA',
-      rateValue: config
-        ? (config.rateType === 'Nominal' ? `${config.rateValue}% (Cap. ${config.capitalization})` : `${config.rateValue}%`)
-        : '0%',
-      notaryFee: config ? this.formatMoney(config.notaryFee, this.quotationCurrency) : 'S/ 0',
-      registryFee: config ? this.formatMoney(config.registryFee, this.quotationCurrency) : 'S/ 0',
-      cokPercent: config ? `${config.cok}%` : '0%'
+      totalPrice: this.formatMoney(totalOperation, q.currency),
+      downPayment: this.formatMoney(q.initialFee, q.currency),
+      downPaymentPercent: `${downPaymentPercent.toFixed(0)}%`,
+      financedAmount: this.formatMoney(q.financingAmount, q.currency),
+      term: `${q.totalQuotas} meses`,
+      rateTypeLabel: q.interestRateType === 'NOMINAL' ? 'TNA' : 'TEA',
+      rateValue: q.interestRateType === 'NOMINAL'
+        ? `${q.interestRatePercentage}% (Cap. ${q.capitalization})`
+        : `${q.interestRatePercentage}%`,
+      notaryFee: this.formatMoney(q.notaryFee, q.currency),
+      registryFee: this.formatMoney(q.registryFee, q.currency)
     };
   }
 
-  private get quotationCurrency(): string {
-    return this.simulationStore.quotation()?.currency ?? 'PEN';
+  get cokPercentLabel(): string {
+    const q = this.simulationStore.quotation();
+    return q ? this.formatPercent(q.cokPercentage) : '0.00%';
   }
 
   get vanLabel(): string {

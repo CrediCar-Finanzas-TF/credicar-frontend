@@ -16,4 +16,8 @@ export class QuotationService {
   getQuotationsByClient(clientId: number): Observable<Quotation[]> {
     return this.http.get<Quotation[]>(`${this.baseUrl}/client/${clientId}`);
   }
+
+  getQuotationById(quotationId: number): Observable<Quotation> {
+    return this.http.get<Quotation>(`${this.baseUrl}/${quotationId}`);
+  }
 }

@@ -19,6 +19,8 @@ export interface QuotationRequest {
   additionalExpenses: number;
   balloonPaymentPercentage: number;
   cokPercentage: number;
+  notaryFee: number;
+  registryFee: number;
 }
 
 export interface PaymentScheduleItem {
@@ -61,6 +63,9 @@ export interface Quotation {
   van: number;
   tir: number;
   tcea: number;
+  notaryFee: number;
+  registryFee: number;
+  cokPercentage: number;
   schedule: PaymentScheduleItem[];
 }
 

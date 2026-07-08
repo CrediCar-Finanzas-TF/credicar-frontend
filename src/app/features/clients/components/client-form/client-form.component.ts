@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
+import {Component, DestroyRef, inject, input, OnInit, output, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputComponent } from '../../../../shared/ui/input/input.component';
@@ -15,6 +15,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 })
 export class ClientFormComponent implements OnInit {
   documentTypes: Client['documentType'][] = ['DNI', 'CE', 'Pasaporte'];
+
+  title = input<string>('Nuevo cliente');
 
   clientForm: FormGroup;
   continue = output<Client>();

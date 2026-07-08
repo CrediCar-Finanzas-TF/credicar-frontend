@@ -249,7 +249,9 @@ export class PhaseInsuranceComponent {
       balloonPaymentPercentage: config.modality === 'Compra inteligente'
         ? (config.vehiclePrice * (config.balloonPercent / 100)) / config.financedAmount
         : 0,
-      cokPercentage: config.cok
+      cokPercentage: config.cok,
+      notaryFee: config.notaryFee,
+      registryFee: config.registryFee
     };
 
     this.quotationService.createQuotation(request).subscribe({

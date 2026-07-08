@@ -201,15 +201,14 @@ export class PhaseFinancingComponent implements OnInit {
   private calculateFinancedAmount() {
     const price = Number(this.financingForm.getRawValue().vehiclePrice) || 0;
     const downPayment = Number(this.financingForm.getRawValue().downPaymentAmount) || 0;
-    const notary = Number(this.financingForm.getRawValue().notaryFee) || 0;
-    const registry = Number(this.financingForm.getRawValue().registryFee) || 0;
 
+    // Notaría y registro ya no se financian: se cobran aparte como gasto inicial
+    // (additionalExpenses de la cuota 1), sin generar interés.
     const assetBalance = Math.max(price - downPayment, 0);
-    const totalLoan = assetBalance + notary + registry;
 
     this.financingForm.patchValue({
       assetFinancedBalance: assetBalance.toFixed(2),
-      totalLoanAmount: totalLoan.toFixed(2)
+      totalLoanAmount: assetBalance.toFixed(2)
     }, { emitEvent: false });
   }
 

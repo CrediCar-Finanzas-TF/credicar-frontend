@@ -37,8 +37,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/clients/pages/clients-page/clients-page.component').then(m => m.ClientsPageComponent)
       },
       {
-        path: 'operations',
-        loadComponent: () => import('./features/operations/pages/operations-page/operations-page.component').then(m => m.OperationsPageComponent)
+        path: 'help',
+        loadComponent: () => import('./features/help/pages/help-page/help-page.component').then(m => m.HelpPageComponent)
       },
       {
         path: 'vehicles',

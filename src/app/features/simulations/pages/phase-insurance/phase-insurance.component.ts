@@ -240,9 +240,9 @@ export class PhaseInsuranceComponent {
       roadsideAssistanceMonthly: this.coverageCost('roadsideAssistance'),
       extendedWarrantyMonthly: this.coverageCost('extendedWarranty'),
       unemploymentInsuranceMonthly: this.coverageCost('unemploymentInsurance'),
-      // Notaría/registro ya están incluidos en "financedAmount" (se financian dentro del préstamo,
-      // igual que en el método francés estándar), así que no se vuelven a cobrar aparte aquí.
-      additionalExpenses: 0,
+      // Notaría/registro no se financian: se cobran aparte como gasto inicial en la cuota 1
+      // (additionalExpenses), sin generar interés y sin inflar el capital financiado.
+      additionalExpenses: config.notaryFee + config.registryFee,
       // El backend aplica este % sobre financingAmount, pero la cuota balón se define como % del
       // PRECIO DEL VEHÍCULO (convención estándar de "Compra Inteligente"). Se ajusta la fracción
       // para que el monto resultante (financingAmount * fracción) sea igual a vehiclePrice * balloonPercent.

@@ -139,8 +139,10 @@ export class PhaseResultComponent implements OnInit {
       };
     }
 
-    const totalOperation = q.financingAmount + q.initialFee;
-    const downPaymentPercent = totalOperation > 0 ? (q.initialFee / totalOperation) * 100 : 0;
+    const vehiclePrice = q.financingAmount + q.initialFee;
+    const downPaymentPercent = vehiclePrice > 0 ? (q.initialFee / vehiclePrice) * 100 : 0;
+    // Notaría/registro ya no están dentro de financingAmount, así que se suman aparte para el precio total real.
+    const totalOperation = vehiclePrice + q.notaryFee + q.registryFee;
 
     return {
       totalPrice: this.formatMoney(totalOperation, q.currency),
@@ -180,7 +182,11 @@ export class PhaseResultComponent implements OnInit {
   get regularInstallmentLabel(): string {
     const q = this.simulationStore.quotation();
     if (!q || q.schedule.length === 0) return 'S/ 0.00';
-    const regular = q.schedule.find((item: PaymentScheduleItem) => item.graceType === 'NONE') ?? q.schedule[q.schedule.length - 1];
+    // Se excluyen cuotas con additionalExpenses (ej. cuota 1 con notaría/registro) para
+    // no mostrar un cargo único como si fuera la cuota "regular" del crédito.
+    const regular = q.schedule.find((item: PaymentScheduleItem) => item.graceType === 'NONE' && item.additionalExpenses === 0)
+      ?? q.schedule.find((item: PaymentScheduleItem) => item.graceType === 'NONE')
+      ?? q.schedule[q.schedule.length - 1];
     return this.formatMoney(regular.monthlyQuota, regular.currency);
   }
 

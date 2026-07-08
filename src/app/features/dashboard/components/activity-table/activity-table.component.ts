@@ -14,7 +14,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 
       <div class="flex items-center justify-between p-6 bg-surface border-t border-l border-r border-border-base shadow-sm shrink-0">
         <h2 class="text-lg font-bold text-text-primary">Actividad Reciente</h2>
-        <a routerLink="/operations" class="text-xs font-medium text-text-secondary border border-border-base px-3 py-1.5 hover:text-text-primary hover:bg-surface-hover transition-colors">
+        <a routerLink="/clients" class="text-xs font-medium text-text-secondary border border-border-base px-3 py-1.5 hover:text-text-primary hover:bg-surface-hover transition-colors">
           Ver todo
         </a>
       </div>
